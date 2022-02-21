@@ -149,9 +149,10 @@ def student_coins():
 
 def change_all_students():
     """Изменяет лидеркоины всех учеников в группе"""
+    # TODO Почему-то выходит со второго раза. Разобраться
     choose_group()
     how_much = int(input("Сколько баллов зачисляем всей группе? "))
-    for_what = input("За что? ")
+    for_what = input("За что? ") # TODO сделать так, чтобы на выйти выходил из программы
     for key, value in group_dic.items():
         value = value + how_much
         group_dic[key] = group_dic[key] + how_much
