@@ -180,7 +180,7 @@ def change_coins_of_choosed_students():
             f.write(
                 f"\n{now} {choosed_student.title()} зачислено {how_much} коин(ов\а) за {for_what}")
             f.write(
-                f" Сейчас у него(ее) {value}")
+                f" Сейчас у него(нее) {value}")
     print(f"{choosed_students} зачислено {how_much} за {for_what}")
     with open(group + '.json', 'w', encoding='utf-8') as f:  # перезаписывает словарь в файл
         json.dump(group_dic, f, ensure_ascii=False, sort_keys=True)
