@@ -4,6 +4,7 @@ import os.path
 import datetime
 from datetime import datetime
 
+
 now = datetime.now().strftime("%d-%m-%Y") # текущая отформатированная дата и время
 
 def help():
@@ -204,4 +205,6 @@ def create_group():
         if wanna_add_students == "да":
             add_student()
 
-main_script()
+
+if __name__ == '__main__':
+    main()
