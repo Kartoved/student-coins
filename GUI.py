@@ -56,7 +56,7 @@ def make_student_window(event):
     student_layout = [[sg.Text(event), sg.Text(dic_group[event])],
                       [sg.Button("Добавить/вычесть"), sg.Button("Сохранить изменения"), sg.Button("Отмена")],
                       [sg.Multiline(default_text=student_log,
-                                    size=(400, 300),)],
+                                    size=(400, 300), key="SAVE")],
                       ]
     return sg.Window(event, student_layout, finalize=True,  return_keyboard_events=True, size=(500, 800))
 
@@ -80,7 +80,8 @@ def main():
             if event in dic_group.keys():
                 print(event)
                 student_window = make_student_window(event)
-
+        elif event == "Сохранить изменения":
+            student_log = "SAVE".
 
 if __name__ == "__main__":
     main_window = make_main_window()
