@@ -8,7 +8,11 @@ array_groups = ["начинающие", "средние", "сильные"]
 
 
 def import_from_json(event):
-    """импортирует фамилии из файла JSON"""
+    """импортирует фамилии из файла JSON
+    
+    Args:
+        event (_str_): словарь с учениками
+    """
     global dic_group
     try:
         with open(f"{event}.json", mode="r", encoding="utf-8") as file_json:
@@ -26,6 +30,17 @@ def import_from_text(event):
     global student_log
     with open(f"Лидеркоины\\{folder}\\{event}.txt", encoding="utf-8") as file_txt:
         student_log = file_txt.read()
+    
+
+def export_to_text(student_name):
+    """экспортирует лог ученика в личный файл .txt
+
+    Args:
+        event (_str_): фамилия ученика
+    """
+    global student_log
+    with open(f"Лидеркоины\\{folder}\\{student_name}.txt", "w", encoding="utf-8") as file_txt:
+        file_txt.write(student_log)
 
 
 def make_main_window():
@@ -39,7 +54,14 @@ def make_main_window():
 
 
 def make_group_window(event):
-    """создаёт окно группы"""
+    """создаёт окно группы
+
+    Args:
+        event (_str_): имя папки
+
+    Returns:
+        _window_: окно группы 
+    """
     global folder
     import_from_json(event)
     group_layout = []
@@ -50,9 +72,17 @@ def make_group_window(event):
 
 
 def make_student_window(event):
-    """создаёт окно карточки ученика"""
-    global student_log
+    """создаёт окно карточки ученика
+
+    Args:
+        event (_str_): имя ученика на кнопке
+
+    Returns:
+        _window_: окно карточки ученика
+    """
+    global student_log, student_name
     import_from_text(event)
+    student_name = event
     student_layout = [[sg.Text(event), sg.Text(dic_group[event])],
                       [sg.Button("Добавить/вычесть"), sg.Button("Сохранить изменения"), sg.Button("Отмена")],
                       [sg.Multiline(default_text=student_log,
@@ -63,6 +93,7 @@ def make_student_window(event):
 
 def main():
     """основной цикл программы"""
+    global student_log
     main_window, group_window, student_window = make_main_window(), None, None
     while True:  # Event Loop
         window, event, values = sg.read_all_windows(timeout=10)
@@ -80,8 +111,13 @@ def main():
             if event in dic_group.keys():
                 print(event)
                 student_window = make_student_window(event)
-        elif event == "Сохранить изменения":
-            student_log = "SAVE".
+            if event == "Сохранить изменения":
+                student_log = student_window["SAVE"].get()
+                export_to_text(student_name)
+                window.close()
+            elif event == "Отмена":
+                window.close()
+                
 
 if __name__ == "__main__":
     main_window = make_main_window()
