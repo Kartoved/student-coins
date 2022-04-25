@@ -9,7 +9,7 @@ array_groups = ["начинающие", "средние", "сильные"]
 
 def import_from_json(event):
     """импортирует фамилии из файла JSON
-    
+
     Args:
         event (_str_): словарь с учениками
     """
@@ -21,26 +21,56 @@ def import_from_json(event):
         dic_group = {"Базаев": 20, "Данилова": 75, }
 
 
-def import_from_text(event):
+def export_to_json():
+    """экспортирует данные учеников в виде словаря JSON
+    """
+    with open(f"{folder}.json", mode="w", encoding="utf-8") as file_json:
+        json.dump(dic_group, file_json, ensure_ascii=False, sort_keys=True)
+
+
+def import_from_text(student_name):
     """импортирует лог ученика из его личного файла .txt
 
     Args:
-        event (_type_): фамилия ученика
+        student_name (_type_): фамилия ученика
     """
     global student_log
-    with open(f"Лидеркоины\\{folder}\\{event}.txt", encoding="utf-8") as file_txt:
+    with open(f"Лидеркоины\\{folder}\\{student_name}.txt", encoding="utf-8") as file_txt:
         student_log = file_txt.read()
-    
+
 
 def export_to_text(student_name):
     """экспортирует лог ученика в личный файл .txt
 
     Args:
-        event (_str_): фамилия ученика
+        student_name (_str_): фамилия ученика
     """
-    global student_log
     with open(f"Лидеркоины\\{folder}\\{student_name}.txt", "w", encoding="utf-8") as file_txt:
         file_txt.write(student_log)
+
+
+def make_change_coins_window():
+    """создаётся окошко добавления или вычитания коинов
+    """
+    change_coins_layout = [
+        [sg.Input(size=(10, 10), key="COINS"), sg.Input()],
+        [sg.Button("Изменить")],
+    ]
+    return sg.Window("Добавить/вычесть", change_coins_layout,
+                     finalize=True,  return_keyboard_events=True,)
+
+
+def change_coins(change_coins_window):
+    """изменяет баллы
+
+    Args:
+        number_of_coins (_int_): количество монеток
+    """
+    number_of_coins = int(change_coins_window["COINS"].get())
+    print(number_of_coins)
+    dic_group[student_name] = dic_group[student_name] + \
+        number_of_coins
+    export_to_json()
 
 
 def make_main_window():
@@ -84,7 +114,8 @@ def make_student_window(event):
     import_from_text(event)
     student_name = event
     student_layout = [[sg.Text(event), sg.Text(dic_group[event])],
-                      [sg.Button("Добавить/вычесть"), sg.Button("Сохранить изменения"), sg.Button("Отмена")],
+                      [sg.Button(
+                          "Добавить/вычесть"), sg.Button("Сохранить изменения"), sg.Button("Отмена")],
                       [sg.Multiline(default_text=student_log,
                                     size=(400, 300), key="SAVE")],
                       ]
@@ -92,33 +123,43 @@ def make_student_window(event):
 
 
 def main():
-    """основной цикл программы"""
-    global student_log
-    main_window, group_window, student_window = make_main_window(), None, None
+    """основной цикл программы
+    """
+    main_window, group_window, student_window, change_coins_window = make_main_window(), None, None, None
     while True:  # Event Loop
-        window, event, values = sg.read_all_windows(timeout=10)
+        window, event, values = sg.read_all_windows()
+        # закрытие окна
         if event == sg.WIN_CLOSED:
             window.close()
-            if window == group_window:
-                group_window = None
-            elif window == student_window:
-                student_window = None
-            elif window == main_window:
+            if window == main_window:
                 break
+        # выбор группы
         elif event in array_groups:
             group_window = make_group_window(event)
         elif group_window:
             if event in dic_group.keys():
-                print(event)
                 student_window = make_student_window(event)
-            if event == "Сохранить изменения":
-                student_log = student_window["SAVE"].get()
-                export_to_text(student_name)
-                window.close()
-            elif event == "Отмена":
-                window.close()
-                
+        # окно карточки ученика
+        if event == "Сохранить изменения":
+            student_log = student_window["SAVE"].get()
+            export_to_text(student_name)
+            window.close()
+        elif event == "Добавить/вычесть":
+            change_coins_window = make_change_coins_window()
+        elif event == "Отмена":
+            window.close()
+        # окно зачисления
+        elif change_coins_window:
+            if event == "Изменить":
+                change_coins(change_coins_window)
+        
+
 
 if __name__ == "__main__":
     main_window = make_main_window()
     main()
+
+# TODO сделай обновление лидеркоинов в ГУИ
+# TODO доделай окошко зачисления. Надо сделать поле "за что"
+# TODO доделай рефакторинг
+# TODO нужна ли менюшка??
