@@ -83,6 +83,7 @@ def simple_change_coins(student_name, quantity):
         quantity (_int_): количество баллов
     """
     dic_group[student_name] = dic_group[student_name] + quantity
+    group_window["STATUS"].update(value=f"{student_name} зачислено {quantity} коинов")
     export_to_json()
 
 
@@ -112,7 +113,9 @@ def make_group_window(event):
     folder = event
     for name, value in dic_group.items():
         group_layout.append([sg.Button(name), sg.Text(value),
-                             sg.Button("2", key=f"2 {name}"), sg.Button("5", key=f"5 {name}"), sg.Button("-50", key=f"-50 {name}"), ])
+                             sg.Button("2", key=f"2 {name}"), 
+                             sg.Button("5", key=f"5 {name}"), 
+                             sg.Button("-50", key=f"-50 {name}"), ])
         btn_list.append(f"2 {name}")
         btn_list.append(f"5 {name}")
         btn_list.append(f"-50 {name}")
@@ -143,6 +146,7 @@ def make_student_window(event):
 def main():
     """основной цикл программы
     """
+    global group_window
     main_window, group_window, student_window, change_coins_window = make_main_window(), None, None, None
     while True:  # Event Loop
         window, event, values = sg.read_all_windows()
@@ -178,8 +182,8 @@ if __name__ == "__main__":
     main_window = make_main_window()
     main()
 
-# TODO сделай обновление лидеркоинов в ГУИ
-# TODO доделай окошко зачисления. Надо сделать поле "за что"
-# TODO доделай рефакторинг
-# TODO нужна ли менюшка??
-# TODO сделай уведомление, что баллы зачислены при нажатии на кнопку
+#TODO сделай обновление лидеркоинов в ГУИ
+#TODO доделай окошко зачисления. Надо сделать поле "за что"
+#TODO доделай рефакторинг
+#TODO нужна ли менюшка??
+#TODO сделай уведомление, что баллы зачислены при нажатии на кнопку
