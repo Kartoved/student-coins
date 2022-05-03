@@ -76,9 +76,13 @@ def change_coins(change_coins_window):
 
 
 def simple_change_coins(student_name, quantity):
+    """прибивляет/вычитает баллы по кнопке
 
-    dic_group[student_name] = dic_group[student_name] + \
-        quantity
+    Args:
+        student_name (_str_): имя студента
+        quantity (_int_): количество баллов
+    """
+    dic_group[student_name] = dic_group[student_name] + quantity
     export_to_json()
 
 
@@ -104,12 +108,14 @@ def make_group_window(event):
     global folder, btn_list
     btn_list = []
     import_from_json(event)
-    group_layout = []
+    group_layout = [[sg.Text("", key="STATUS")]]
     folder = event
     for name, value in dic_group.items():
         group_layout.append([sg.Button(name), sg.Text(value),
-                             sg.Button("2", key=f"2 {name}"), sg.Button("+5"), sg.Button("-50"), ])
+                             sg.Button("2", key=f"2 {name}"), sg.Button("5", key=f"5 {name}"), sg.Button("-50", key=f"-50 {name}"), ])
         btn_list.append(f"2 {name}")
+        btn_list.append(f"5 {name}")
+        btn_list.append(f"-50 {name}")
     return sg.Window(event, group_layout, finalize=True,  return_keyboard_events=True, )
 
 
@@ -152,15 +158,8 @@ def main():
             if event in dic_group.keys():
                 student_window = make_student_window(event)
             elif event in btn_list:
-                print(btn_list)
-                print(event)
-                x = split(event[1])
-                print(x)
-            #    simple_change_coins(x[1], int(x[0]))
-            # elif event == "+5":
-            # elif event == "-50":
-
-        # окно карточки ученика
+                coins_and_name = event.split()
+                simple_change_coins(coins_and_name[1], int(coins_and_name[0]))
         if event == "Сохранить изменения":
             student_log = student_window["SAVE"].get()
             export_to_text(student_name)
@@ -183,3 +182,4 @@ if __name__ == "__main__":
 # TODO доделай окошко зачисления. Надо сделать поле "за что"
 # TODO доделай рефакторинг
 # TODO нужна ли менюшка??
+# TODO сделай уведомление, что баллы зачислены при нажатии на кнопку
