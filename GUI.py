@@ -1,3 +1,5 @@
+from array import array
+from posixpath import split
 import PySimpleGUI as sg
 import json
 import lidercoins
@@ -73,6 +75,13 @@ def change_coins(change_coins_window):
     export_to_json()
 
 
+def simple_change_coins(student_name, quantity):
+
+    dic_group[student_name] = dic_group[student_name] + \
+        quantity
+    export_to_json()
+
+
 def make_main_window():
     """создание основного окна"""
     main_layout = [[sg.Menu(menu_def)],
@@ -92,12 +101,15 @@ def make_group_window(event):
     Returns:
         _window_: окно группы 
     """
-    global folder
+    global folder, btn_list
+    btn_list = []
     import_from_json(event)
     group_layout = []
     folder = event
-    for key, value in dic_group.items():
-        group_layout.append([sg.Button(key), sg.Text(value)])
+    for name, value in dic_group.items():
+        group_layout.append([sg.Button(name), sg.Text(value),
+                             sg.Button("2", key=f"2 {name}"), sg.Button("+5"), sg.Button("-50"), ])
+        btn_list.append(f"2 {name}")
     return sg.Window(event, group_layout, finalize=True,  return_keyboard_events=True, )
 
 
@@ -139,6 +151,15 @@ def main():
         elif group_window:
             if event in dic_group.keys():
                 student_window = make_student_window(event)
+            elif event in btn_list:
+                print(btn_list)
+                print(event)
+                x = split(event[1])
+                print(x)
+            #    simple_change_coins(x[1], int(x[0]))
+            # elif event == "+5":
+            # elif event == "-50":
+
         # окно карточки ученика
         if event == "Сохранить изменения":
             student_log = student_window["SAVE"].get()
@@ -152,7 +173,6 @@ def main():
         elif change_coins_window:
             if event == "Изменить":
                 change_coins(change_coins_window)
-        
 
 
 if __name__ == "__main__":
