@@ -1,5 +1,3 @@
-from array import array
-from posixpath import split
 import PySimpleGUI as sg
 import json
 from datetime import datetime
@@ -12,6 +10,7 @@ array_groups = ["начинающие", "средние", "сильные"]
 now = datetime.now().strftime("%d-%m-%Y")
 
 
+# функции импорта и экспорта файлов
 def import_from_json(event):
     """импортирует фамилии из файла JSON
 
@@ -26,7 +25,7 @@ def import_from_json(event):
         dic_group = {"Базаев": 20, "Данилова": 75, }
 
 
-def export_to_json():
+def export_to_json(folder):
     """экспортирует данные учеников в виде словаря JSON
     """
     with open(f"{folder}.json", mode="w", encoding="utf-8") as file_json:
@@ -54,17 +53,7 @@ def export_to_text(student_name, student_log):
         file_txt.write(student_log)
 
 
-def make_change_coins_window():
-    """создаётся окошко добавления или вычитания коинов
-    """
-    change_coins_layout = [
-        [sg.Input(size=(10, 10), key="COINS"), sg.Input(key="FOR_WHAT")],
-        [sg.Button("Изменить")],
-    ]
-    return sg.Window("Добавить/вычесть", change_coins_layout,
-                     finalize=True,  return_keyboard_events=True,)
-
-
+# другие функции
 def change_coins(change_coins_window):
     """изменяет баллы
 
@@ -76,7 +65,7 @@ def change_coins(change_coins_window):
     print(number_of_coins)
     dic_group[student_name] = dic_group[student_name] + \
         number_of_coins
-    export_to_json()
+    export_to_json(folder)
     make_message(student_name, number_of_coins, action)
 
 
@@ -90,9 +79,27 @@ def simple_change_coins(student_name, quantity):
     dic_group[student_name] = dic_group[student_name] + quantity
     group_window["STATUS"].update(
         value=f"{student_name} зачислено {quantity} коинов")
-    export_to_json()
+    export_to_json(folder)
 
 
+def make_message(student_name, quantity_of_coins, action):
+    """создает сообщение о новой операции в текстовом логе и отображает изменения в окне STUDENT_LOG
+
+    Args:
+        student_name (_str_): имя ученика
+        quantity_of_coins (_type_): количество коинов
+        action (_type_): за что получил
+    """
+    with open(f"Лидеркоины\\{folder}\\{student_name}.txt", "a", encoding="utf-8") as file_txt:
+        file_txt.write(
+            f"\n{now} {student_name} {quantity_of_coins} за {action}")
+    group_window["STATUS"].update(
+        f"\n{now} {student_name} {quantity_of_coins} за {action}")
+    import_from_text(student_name)
+    student_window["STUDENT_LOG"].update(student_log)
+
+
+# фунции создания окон
 def make_main_window():
     """создание основного окна"""
     main_layout = [[sg.Menu(menu_def)],
@@ -107,16 +114,16 @@ def make_group_window(event):
     """создаёт окно группы
 
     Args:
-        event (_str_): имя папки
+        folder (_str_): имя папки группы
 
     Returns:
-        _window_: окно группы 
+        _window_: окно группы
     """
-    global folder, btn_list
-    btn_list = []
-    import_from_json(event)
-    group_layout = [[sg.Text("", key="STATUS")]]
+    global btn_list, folder
     folder = event
+    btn_list = []
+    import_from_json(folder)
+    group_layout = [[sg.Text("", key="STATUS")]]
     for name, value in dic_group.items():
         group_layout.append([sg.Button(name), sg.Text(value),
                              sg.Button("2", key=f"2 {name}"),
@@ -125,7 +132,7 @@ def make_group_window(event):
         btn_list.append(f"2 {name}")
         btn_list.append(f"5 {name}")
         btn_list.append(f"-50 {name}")
-    return sg.Window(event, group_layout, finalize=True,  return_keyboard_events=True, )
+    return sg.Window(folder, group_layout, finalize=True,  return_keyboard_events=True, )
 
 
 def make_student_window(event):
@@ -149,29 +156,23 @@ def make_student_window(event):
     return sg.Window(event, student_layout, finalize=True,  return_keyboard_events=True, size=(500, 800))
 
 
-def make_message(student_name, quantity_of_coins, action):
-    """создает сообщение о новой операции в текстовом логе и отображает изменения в окне STUDENT_LOG
-
-    Args:
-        student_name (_str_): имя ученика
-        quantity_of_coins (_type_): количество коинов
-        action (_type_): за что получил
+def make_change_coins_window():
+    """создаётся окошко добавления или вычитания коинов
     """
-    with open(f"Лидеркоины\\{folder}\\{student_name}.txt", "a", encoding="utf-8") as file_txt:
-        file_txt.write(
-            f"\n{now} {student_name} {quantity_of_coins} за {action}")
-    group_window["STATUS"].update(
-        f"\n{now} {student_name} {quantity_of_coins} за {action}")
-    import_from_text(student_name)
-    student_window["STUDENT_LOG"].update(student_log)
+    change_coins_layout = [
+        [sg.Input(size=(10, 10), key="COINS"), sg.Input(key="FOR_WHAT")],
+        [sg.Button("Добавить")],
+    ]
+    return sg.Window("Добавить/вычесть", change_coins_layout,
+                     finalize=True,  return_keyboard_events=True,)
 
 
+# основной цикл программы
 def main():
-    """основной цикл программы
-    """
     global group_window, student_window
-    main_window, group_window, student_window, change_coins_window = make_main_window(), None, None, None
-    while True:  # Event Loop
+    main_window, group_window, student_window, change_coins_window = \
+        make_main_window(), None, None, None
+    while True:
         window, event, values = sg.read_all_windows()
         # закрытие окна
         if event == sg.WIN_CLOSED:
@@ -181,12 +182,14 @@ def main():
         # выбор группы
         elif event in array_groups:
             group_window = make_group_window(event)
+        # создание других окон и обработка кнопок
         elif group_window:
             if event in dic_group.keys():
                 student_window = make_student_window(event)
             elif event in btn_list:
                 coins_and_name = event.split()
                 simple_change_coins(coins_and_name[1], int(coins_and_name[0]))
+        # обработка кнопок окна карточки ученика
         if event == "Сохранить изменения":
             student_log = student_window["STUDENT_LOG"].get()
             export_to_text(student_name, student_log)
@@ -195,9 +198,9 @@ def main():
             change_coins_window = make_change_coins_window()
         elif event == "Отмена":
             window.close()
-        # окно зачисления
+        # окно зачисления и обработка его кнопок
         elif change_coins_window:
-            if event == "Изменить":
+            if event == "Добавить":
                 change_coins(change_coins_window)
 
 
@@ -207,4 +210,3 @@ if __name__ == "__main__":
 
 # TODO доделай рефакторинг
 # TODO нужна ли менюшка??
-
