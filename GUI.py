@@ -11,7 +11,7 @@ now = datetime.now().strftime("%d-%m-%Y")
 
 
 # функции импорта и экспорта файлов
-def import_from_json(event):
+def import_from_json(folder):
     """импортирует фамилии из файла JSON
 
     Args:
@@ -19,7 +19,7 @@ def import_from_json(event):
     """
     global dic_group
     try:
-        with open(f"{event}.json", mode="r", encoding="utf-8") as file_json:
+        with open(f"{folder}.json", mode="r", encoding="utf-8") as file_json:
             dic_group = json.load(file_json)
     except:
         dic_group = {"Базаев": 20, "Данилова": 75, }
@@ -27,6 +27,9 @@ def import_from_json(event):
 
 def export_to_json(folder):
     """экспортирует данные учеников в виде словаря JSON
+    
+    Args:
+        folder (_str_): папка группы
     """
     with open(f"{folder}.json", mode="w", encoding="utf-8") as file_json:
         json.dump(dic_group, file_json, ensure_ascii=False, sort_keys=True)
@@ -70,7 +73,7 @@ def change_coins(change_coins_window):
 
 
 def simple_change_coins(student_name, quantity):
-    """прибивляет/вычитает баллы по кнопке
+    """прибавляет/вычитает баллы по кнопке
 
     Args:
         student_name (_str_): имя студента
@@ -80,6 +83,7 @@ def simple_change_coins(student_name, quantity):
     group_window["STATUS"].update(
         value=f"{student_name} зачислено {quantity} коинов")
     export_to_json(folder)
+    group_window[f"{student_name} QUANTITY_COINS"].update(dic_group[student_name])
 
 
 def make_message(student_name, quantity_of_coins, action):
@@ -87,8 +91,8 @@ def make_message(student_name, quantity_of_coins, action):
 
     Args:
         student_name (_str_): имя ученика
-        quantity_of_coins (_type_): количество коинов
-        action (_type_): за что получил
+        quantity_of_coins (_int_): количество коинов
+        action (_str_): за что получил
     """
     with open(f"Лидеркоины\\{folder}\\{student_name}.txt", "a", encoding="utf-8") as file_txt:
         file_txt.write(
@@ -97,7 +101,7 @@ def make_message(student_name, quantity_of_coins, action):
         f"\n{now} {student_name} {quantity_of_coins} за {action}")
     import_from_text(student_name)
     student_window["STUDENT_LOG"].update(student_log)
-
+    
 
 # фунции создания окон
 def make_main_window():
@@ -125,7 +129,7 @@ def make_group_window(event):
     import_from_json(folder)
     group_layout = [[sg.Text("", key="STATUS")]]
     for name, value in dic_group.items():
-        group_layout.append([sg.Button(name), sg.Text(value),
+        group_layout.append([sg.Button(name), sg.Text(value, key=f"{name} QUANTITY_COINS"),
                              sg.Button("2", key=f"2 {name}"),
                              sg.Button("5", key=f"5 {name}"),
                              sg.Button("-50", key=f"-50 {name}"), ])
