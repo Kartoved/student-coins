@@ -2,12 +2,15 @@ from array import array
 from posixpath import split
 import PySimpleGUI as sg
 import json
-import lidercoins
+from datetime import datetime
+
 
 
 menu_def = [["Выбрать группу", ["начинающие", "средние", "сильные"]]]
 array_groups = ["начинающие", "средние", "сильные"]
 
+# текущая отформатированная дата и время
+now = datetime.now().strftime("%d-%m-%Y")
 
 def import_from_json(event):
     """импортирует фамилии из файла JSON
@@ -41,7 +44,7 @@ def import_from_text(student_name):
         student_log = file_txt.read()
 
 
-def export_to_text(student_name):
+def export_to_text(student_name, student_log):
     """экспортирует лог ученика в личный файл .txt
 
     Args:
@@ -55,7 +58,7 @@ def make_change_coins_window():
     """создаётся окошко добавления или вычитания коинов
     """
     change_coins_layout = [
-        [sg.Input(size=(10, 10), key="COINS"), sg.Input()],
+        [sg.Input(size=(10, 10), key="COINS"), sg.Input(key="FOR_WHAT")],
         [sg.Button("Изменить")],
     ]
     return sg.Window("Добавить/вычесть", change_coins_layout,
@@ -69,10 +72,12 @@ def change_coins(change_coins_window):
         number_of_coins (_int_): количество монеток
     """
     number_of_coins = int(change_coins_window["COINS"].get())
+    action = change_coins_window["FOR_WHAT"].get()
     print(number_of_coins)
     dic_group[student_name] = dic_group[student_name] + \
         number_of_coins
     export_to_json()
+    make_message(student_name, number_of_coins, action)
 
 
 def simple_change_coins(student_name, quantity):
@@ -143,6 +148,12 @@ def make_student_window(event):
     return sg.Window(event, student_layout, finalize=True,  return_keyboard_events=True, size=(500, 800))
 
 
+def make_message(student_name, quantity_of_coins, action):
+    """создает сообщение о новой операции в логе
+    """
+    with open(f"Лидеркоины\\{folder}\\{student_name}.txt", "a", encoding="utf-8") as file_txt:
+        file_txt.write(f"\n{now} {student_name} {quantity_of_coins} за {action}")
+
 def main():
     """основной цикл программы
     """
@@ -166,7 +177,7 @@ def main():
                 simple_change_coins(coins_and_name[1], int(coins_and_name[0]))
         if event == "Сохранить изменения":
             student_log = student_window["SAVE"].get()
-            export_to_text(student_name)
+            export_to_text(student_name, student_log)
             window.close()
         elif event == "Добавить/вычесть":
             change_coins_window = make_change_coins_window()
@@ -186,4 +197,4 @@ if __name__ == "__main__":
 #TODO доделай окошко зачисления. Надо сделать поле "за что"
 #TODO доделай рефакторинг
 #TODO нужна ли менюшка??
-#TODO сделай уведомление, что баллы зачислены при нажатии на кнопку
+#TODO сохранение в лог файла
