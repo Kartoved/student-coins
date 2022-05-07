@@ -1,6 +1,6 @@
-import PySimpleGUI as sg
-import json
 from datetime import datetime
+import json
+import PySimpleGUI as sg
 
 
 menu_def = [["Выбрать группу", ["начинающие", "средние", "сильные"]]]
@@ -27,7 +27,7 @@ def import_from_json(folder):
 
 def export_to_json(folder):
     """экспортирует данные учеников в виде словаря JSON
-    
+
     Args:
         folder (_str_): папка группы
     """
@@ -42,7 +42,7 @@ def import_from_text(student_name):
         student_name (_type_): фамилия ученика
     """
     global student_log
-    with open(f"Лидеркоины\\{folder}\\{student_name}.txt", encoding="utf-8") as file_txt:
+    with open(f"Лидеркоины/{folder}/{student_name}.txt", encoding="utf-8") as file_txt:
         student_log = file_txt.read()
 
 
@@ -51,8 +51,9 @@ def export_to_text(student_name, student_log):
 
     Args:
         student_name (_str_): фамилия ученика
+        student_log: лог ученика
     """
-    with open(f"Лидеркоины\\{folder}\\{student_name}.txt", "w", encoding="utf-8") as file_txt:
+    with open(f"Лидеркоины/{folder}/{student_name}.txt", "w", encoding="utf-8") as file_txt:
         file_txt.write(student_log)
 
 
@@ -64,12 +65,30 @@ def change_coins(change_coins_window):
         number_of_coins (_int_): количество монеток
     """
     number_of_coins = int(change_coins_window["COINS"].get())
-    action = change_coins_window["FOR_WHAT"].get()
+    for_what = change_coins_window["FOR_WHAT"].get()
     print(number_of_coins)
     dic_group[student_name] = dic_group[student_name] + \
         number_of_coins
     export_to_json(folder)
-    make_message(student_name, number_of_coins, action)
+    make_message(student_name, number_of_coins, for_what)
+
+
+def how_much_coins(quantity):
+    """проверяет, сколько коинов надо зачислить. Работает для кнопок быстрого зачисления
+    
+    Args:
+        quantity (_int_): количество баллов
+        
+    Return:
+        for_what (_str_): за что получил баллы
+    """
+    if quantity == 2:
+        for_what = "посещение"
+    elif quantity == 5:
+        for_what = "победу"
+    elif quantity == 10:
+        for_what = "участие в онлайн турнире"
+    return for_what
 
 
 def simple_change_coins(student_name, quantity):
@@ -79,29 +98,31 @@ def simple_change_coins(student_name, quantity):
         student_name (_str_): имя студента
         quantity (_int_): количество баллов
     """
+    for_what = how_much_coins(quantity)
     dic_group[student_name] = dic_group[student_name] + quantity
     group_window["STATUS"].update(
-        value=f"{student_name} зачислено {quantity} коинов")
-    export_to_json(folder)
+        value=f"{now} {student_name} зачислено {quantity} коинов за {for_what}")
+    # export_to_json(folder)
+    # make_message(student_name, quantity, for_what)
     group_window[f"{student_name} QUANTITY_COINS"].update(dic_group[student_name])
 
 
-def make_message(student_name, quantity_of_coins, action):
+def make_message(student_name, quantity_of_coins, for_what):
     """создает сообщение о новой операции в текстовом логе и отображает изменения в окне STUDENT_LOG
 
     Args:
         student_name (_str_): имя ученика
         quantity_of_coins (_int_): количество коинов
-        action (_str_): за что получил
+        for_what (_str_): за что получил
     """
-    with open(f"Лидеркоины\\{folder}\\{student_name}.txt", "a", encoding="utf-8") as file_txt:
+    with open(f"Лидеркоины/{folder}/{student_name}.txt", "a", encoding="utf-8") as file_txt:
         file_txt.write(
-            f"\n{now} {student_name} {quantity_of_coins} за {action}")
+            f"\n{now} {student_name} {quantity_of_coins} за {for_what}")
     group_window["STATUS"].update(
-        f"\n{now} {student_name} {quantity_of_coins} за {action}")
+        f"\n{now} {student_name} {quantity_of_coins} за {for_what}")
     import_from_text(student_name)
     student_window["STUDENT_LOG"].update(student_log)
-    
+
 
 # фунции создания окон
 def make_main_window():
@@ -132,10 +153,10 @@ def make_group_window(event):
         group_layout.append([sg.Button(name), sg.Text(value, key=f"{name} QUANTITY_COINS"),
                              sg.Button("2", key=f"2 {name}"),
                              sg.Button("5", key=f"5 {name}"),
-                             sg.Button("-50", key=f"-50 {name}"), ])
+                             sg.Button("10", key=f"10 {name}"), ])
         btn_list.append(f"2 {name}")
         btn_list.append(f"5 {name}")
-        btn_list.append(f"-50 {name}")
+        btn_list.append(f"10 {name}")
     return sg.Window(folder, group_layout, finalize=True,  return_keyboard_events=True, )
 
 
@@ -214,3 +235,4 @@ if __name__ == "__main__":
 
 # TODO доделай рефакторинг
 # TODO нужна ли менюшка??
+# TODO доделать кнопки быстрого добавления баллов
