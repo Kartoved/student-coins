@@ -75,10 +75,10 @@ def change_coins(change_coins_window):
 
 def how_much_coins(quantity):
     """проверяет, сколько коинов надо зачислить. Работает для кнопок быстрого зачисления
-    
+
     Args:
         quantity (_int_): количество баллов
-        
+
     Return:
         for_what (_str_): за что получил баллы
     """
@@ -102,9 +102,10 @@ def simple_change_coins(student_name, quantity):
     dic_group[student_name] = dic_group[student_name] + quantity
     group_window["STATUS"].update(
         value=f"{now} {student_name} зачислено {quantity} коинов за {for_what}")
-    # export_to_json(folder)
-    # make_message(student_name, quantity, for_what)
-    group_window[f"{student_name} QUANTITY_COINS"].update(dic_group[student_name])
+    export_to_json(folder)
+    make_message(student_name, quantity, for_what)
+    group_window[f"{student_name} QUANTITY_COINS"].update(
+        dic_group[student_name])
 
 
 def make_message(student_name, quantity_of_coins, for_what):
@@ -117,11 +118,9 @@ def make_message(student_name, quantity_of_coins, for_what):
     """
     with open(f"Лидеркоины/{folder}/{student_name}.txt", "a", encoding="utf-8") as file_txt:
         file_txt.write(
-            f"\n{now} {student_name} {quantity_of_coins} за {for_what}")
+            f"\n{now} {student_name} {quantity_of_coins} за {for_what}. Сейчас у него/неё {dic_group[student_name]}")
     group_window["STATUS"].update(
-        f"\n{now} {student_name} {quantity_of_coins} за {for_what}")
-    import_from_text(student_name)
-    student_window["STUDENT_LOG"].update(student_log)
+        f"\n{now} {student_name} {quantity_of_coins} за {for_what}. Сейчас у него/неё {dic_group[student_name]}")
 
 
 # фунции создания окон
@@ -191,7 +190,6 @@ def make_change_coins_window():
     return sg.Window("Добавить/вычесть", change_coins_layout,
                      finalize=True,  return_keyboard_events=True,)
 
-
 # основной цикл программы
 def main():
     global group_window, student_window
@@ -235,4 +233,3 @@ if __name__ == "__main__":
 
 # TODO доделай рефакторинг
 # TODO нужна ли менюшка??
-# TODO доделать кнопки быстрого добавления баллов
