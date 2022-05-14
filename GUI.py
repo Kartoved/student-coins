@@ -191,6 +191,8 @@ def make_change_coins_window():
                      finalize=True,  return_keyboard_events=True,)
 
 # основной цикл программы
+
+
 def main():
     global group_window, student_window
     main_window, group_window, student_window, change_coins_window = \
@@ -233,3 +235,4 @@ if __name__ == "__main__":
 
 # TODO доделай рефакторинг
 # TODO нужна ли менюшка??
+# TODO выровнять все элементы
