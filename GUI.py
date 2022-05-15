@@ -149,7 +149,7 @@ def make_group_window(event):
     import_from_json(folder)
     group_layout = [[sg.Text("", key="STATUS")]]
     for name, value in dic_group.items():
-        group_layout.append([sg.Button(name), sg.Text(value, key=f"{name} QUANTITY_COINS"),
+        group_layout.append([sg.Button(name), sg.Text(value, key=f"{name} QUANTITY_COINS", size=(300, 300)),
                              sg.Button("2", key=f"2 {name}"),
                              sg.Button("5", key=f"5 {name}"),
                              sg.Button("10", key=f"10 {name}"), ])
