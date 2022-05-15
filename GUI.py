@@ -120,7 +120,7 @@ def make_message(student_name, quantity_of_coins, for_what):
         file_txt.write(
             f"\n{now} {student_name} {quantity_of_coins} за {for_what}. Сейчас у него/неё {dic_group[student_name]}")
     group_window["STATUS"].update(
-        f"\n{now} {student_name} {quantity_of_coins} за {for_what}. Сейчас у него/неё {dic_group[student_name]}")
+        f"\n{now} {student_name} {quantity_of_coins} за {for_what}. \nСейчас у него/неё {dic_group[student_name]}")
 
 
 # фунции создания окон
@@ -147,12 +147,12 @@ def make_group_window(event):
     folder = event
     btn_list = []
     import_from_json(folder)
-    group_layout = [[sg.Text("", key="STATUS")]]
+    group_layout = [[sg.Text(" \n ", key="STATUS")]]
     for name, value in dic_group.items():
-        group_layout.append([sg.Button(name), sg.Text(value, key=f"{name} QUANTITY_COINS", size=(300, 300)),
-                             sg.Button("2", key=f"2 {name}"),
-                             sg.Button("5", key=f"5 {name}"),
-                             sg.Button("10", key=f"10 {name}"), ])
+        group_layout.append([sg.Button(name, size=(15, 0)), sg.Text(value, key=f"{name} QUANTITY_COINS", size=(5, 0)),
+                             sg.Button("2", key=f"2 {name}", size=(3, 0)),
+                             sg.Button("5", key=f"5 {name}", size=(3, 0)),
+                             sg.Button("10", key=f"10 {name}", size=(3, 0))])
         btn_list.append(f"2 {name}")
         btn_list.append(f"5 {name}")
         btn_list.append(f"10 {name}")
@@ -235,4 +235,4 @@ if __name__ == "__main__":
 
 # TODO доделай рефакторинг
 # TODO нужна ли менюшка??
-# TODO выровнять все элементы
+# FIXME в окне лога не отображается операция через добавить вычесть. Отображается только после перезагрузки окна
