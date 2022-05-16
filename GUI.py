@@ -66,10 +66,10 @@ def change_coins(change_coins_window):
     """
     number_of_coins = int(change_coins_window["COINS"].get())
     for_what = change_coins_window["FOR_WHAT"].get()
-    print(number_of_coins)
     dic_group[student_name] = dic_group[student_name] + \
         number_of_coins
     export_to_json(folder)
+
     make_message(student_name, number_of_coins, for_what)
 
 
@@ -121,6 +121,9 @@ def make_message(student_name, quantity_of_coins, for_what):
             f"\n{now} {student_name} {quantity_of_coins} за {for_what}. Сейчас у него/неё {dic_group[student_name]}")
     group_window["STATUS"].update(
         f"\n{now} {student_name} {quantity_of_coins} за {for_what}. \nСейчас у него/неё {dic_group[student_name]}")
+    if student_window:
+        import_from_text(student_name)
+        student_window["STUDENT_LOG"].update(student_log)
 
 
 # фунции создания окон
@@ -233,7 +236,6 @@ if __name__ == "__main__":
     main_window = make_main_window()
     main()
 
-# TODO доделай рефакторинг
 # TODO нужна ли менюшка??
-# FIXME в окне лога не отображается операция через добавить вычесть. Отображается только после перезагрузки окна
-# FIXME доделай выравнивание
+# TODO сделай возможность добавлять учеников
+# TODO сделай возможность добавлять группы
