@@ -66,24 +66,38 @@ def export_to_text(student_name, student_log):
 # функции добавления учеников и групп
 def create_group_window():
     change_coins_layout = [
-        [sg.Input(size=20, key="NEW_GROUP")],
+        [sg.Input(size=20, key="NEW_GROUP_INPUT")],
         [sg.Button("Добавить группу", key="ADD_GROUP")],
-        [sg.Text("")]
+        [sg.Text("", key="NEW_GROUP_STATUS")]
     ]
     return sg.Window("Добавление группы", change_coins_layout,
                      finalize=True,  return_keyboard_events=True, size=(500, 200))
 
 
 def create_group(name_of_new_group):
-    print(name_of_new_group)
+    """создаёт новую группу и добавляет её в файл JSON
+
+    Args:
+        name_of_new_group (_str_): имя новой группы
+    """
     array_groups.append(name_of_new_group)
     with open("groups.json", "w", encoding="utf-8") as f:
         json.dump(array_groups, f, ensure_ascii=False, sort_keys=True)
+    open(f"{name_of_new_group}.json", "w").close()
+    new_group_window["NEW_GROUP_INPUT"].update(value="")
+    new_group_window["NEW_GROUP_STATUS"].update(value=f"Группа {name_of_new_group} была создана")
 
 
 def create_student():
     pass
 
+
+def delete_group():
+    pass
+
+
+def delete_student():
+    pass
 # другие функции
 
 
@@ -229,9 +243,9 @@ def make_change_coins_window():
 
 
 def main():
-    global group_window, student_window
-    main_window, group_window, student_window, change_coins_window = \
-        None, None, None, None
+    global group_window, student_window, new_group_window
+    main_window, group_window, student_window, change_coins_window, new_group_window = \
+        None, None, None, None, None
     while True:
         window, event, values = sg.read_all_windows()
         # закрытие окна
@@ -253,7 +267,7 @@ def main():
                 simple_change_coins(coins_and_name[1], int(coins_and_name[0]))
         elif new_group_window:
             if event == "ADD_GROUP":
-                create_group(new_group_window["NEW_GROUP"].get())
+                create_group(new_group_window["NEW_GROUP_INPUT"].get())
         # обработка кнопок окна карточки ученика
         if event == "Сохранить изменения":
             export_to_text(student_name, student_window["STUDENT_LOG"].get())
@@ -275,3 +289,4 @@ if __name__ == "__main__":
 # TODO: нужна ли менюшка??
 # TODO сделай возможность добавлять учеников
 # TODO сделай возможность добавлять группы
+# FIXME поля ввода баллов и "за что" не обнуляются после нажатия кнопки "добавить"
