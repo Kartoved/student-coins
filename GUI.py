@@ -2,9 +2,15 @@ from datetime import datetime
 import json
 import PySimpleGUI as sg
 
+# менюшка в главном окне
+menu_def = [["Добавить группу", ["Добавить группу"]]]
 
-menu_def = [["Выбрать группу", ["начинающие", "средние", "сильные"]]]
-array_groups = ["начинающие", "средние", "сильные"]
+# подгрузка списка групп из JSON
+try:
+    with open("groups.json", "r") as f:
+        array_groups = json.load(f)
+except:
+    array_groups = ["начинающие", "средние", "сильные"]
 
 # текущая отформатированная дата и время
 now = datetime.now().strftime("%d-%m-%Y")
@@ -57,7 +63,30 @@ def export_to_text(student_name, student_log):
         file_txt.write(student_log)
 
 
+# функции добавления учеников и групп
+def create_group_window():
+    change_coins_layout = [
+        [sg.Input(size=20, key="NEW_GROUP")],
+        [sg.Button("Добавить группу", key="ADD_GROUP")],
+        [sg.Text("")]
+    ]
+    return sg.Window("Добавление группы", change_coins_layout,
+                     finalize=True,  return_keyboard_events=True, size=(500, 200))
+
+
+def create_group(name_of_new_group):
+    print(name_of_new_group)
+    array_groups.append(name_of_new_group)
+    with open("groups.json", "w", encoding="utf-8") as f:
+        json.dump(array_groups, f, ensure_ascii=False, sort_keys=True)
+
+
+def create_student():
+    pass
+
 # другие функции
+
+
 def change_coins(change_coins_window):
     """изменяет баллы
 
@@ -129,11 +158,14 @@ def make_message(student_name, quantity_of_coins, for_what):
 # фунции создания окон
 def make_main_window():
     """создание основного окна"""
-    main_layout = [[sg.Menu(menu_def)],
-                   [sg.Button("начинающие")],
-                   [sg.Button("средние")],
-                   [sg.Button("сильные")],
-                   ]
+    # main_layout = [[sg.Menu(menu_def)],
+    #                [sg.Button("начинающие")],
+    #                [sg.Button("средние")],
+    #                [sg.Button("сильные")],
+    #                ]
+    main_layout = [[sg.Menu(menu_def)]]
+    for group in array_groups:
+        main_layout.append([sg.Button(group)])
     return sg.Window("Лидеркоины", main_layout, finalize=True,  return_keyboard_events=True,)
 
 
@@ -141,7 +173,7 @@ def make_group_window(event):
     """создаёт окно группы
 
     Args:
-        folder (_str_): имя папки группы
+        event (_str_): имя папки группы
 
     Returns:
         _window_: окно группы
@@ -191,7 +223,7 @@ def make_change_coins_window():
         [sg.Button("Добавить")],
     ]
     return sg.Window("Добавить/вычесть", change_coins_layout,
-                     finalize=True,  return_keyboard_events=True,)
+                     finalize=True,  return_keyboard_events=True)
 
 # основной цикл программы
 
@@ -199,7 +231,7 @@ def make_change_coins_window():
 def main():
     global group_window, student_window
     main_window, group_window, student_window, change_coins_window = \
-        make_main_window(), None, None, None
+        None, None, None, None
     while True:
         window, event, values = sg.read_all_windows()
         # закрытие окна
@@ -207,6 +239,8 @@ def main():
             window.close()
             if window == main_window:
                 break
+        elif event == "Добавить группу":
+            new_group_window = create_group_window()
         # выбор группы
         elif event in array_groups:
             group_window = make_group_window(event)
@@ -217,10 +251,12 @@ def main():
             elif event in btn_list:
                 coins_and_name = event.split()
                 simple_change_coins(coins_and_name[1], int(coins_and_name[0]))
+        elif new_group_window:
+            if event == "ADD_GROUP":
+                create_group(new_group_window["NEW_GROUP"].get())
         # обработка кнопок окна карточки ученика
         if event == "Сохранить изменения":
-            student_log = student_window["STUDENT_LOG"].get()
-            export_to_text(student_name, student_log)
+            export_to_text(student_name, student_window["STUDENT_LOG"].get())
             window.close()
         elif event == "Добавить/вычесть":
             change_coins_window = make_change_coins_window()
