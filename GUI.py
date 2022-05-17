@@ -3,7 +3,7 @@ import json
 import PySimpleGUI as sg
 
 # менюшка в главном окне
-menu_def = [["Добавить группу", ["Добавить группу"]]]
+menu_def = [["Добавить/удалить группу", ["Добавить группу", "Удалить группу"]]]
 
 # подгрузка списка групп из JSON
 try:
@@ -107,13 +107,15 @@ def change_coins(change_coins_window):
     Args:
         number_of_coins (_int_): количество монеток
     """
-    number_of_coins = int(change_coins_window["COINS"].get())
-    for_what = change_coins_window["FOR_WHAT"].get()
+    number_of_coins = int(change_coins_window["COINS_INPUT"].get())
+    for_what = change_coins_window["FOR_WHAT_INPUT"].get()
     dic_group[student_name] = dic_group[student_name] + \
         number_of_coins
     export_to_json(folder)
-
     make_message(student_name, number_of_coins, for_what)
+    change_coins_window["FOR_WHAT_INPUT"].update(value="")
+    change_coins_window["COINS_INPUT"].update(value="")
+
 
 
 def how_much_coins(quantity):
@@ -172,15 +174,10 @@ def make_message(student_name, quantity_of_coins, for_what):
 # фунции создания окон
 def make_main_window():
     """создание основного окна"""
-    # main_layout = [[sg.Menu(menu_def)],
-    #                [sg.Button("начинающие")],
-    #                [sg.Button("средние")],
-    #                [sg.Button("сильные")],
-    #                ]
     main_layout = [[sg.Menu(menu_def)]]
     for group in array_groups:
         main_layout.append([sg.Button(group)])
-    return sg.Window("Лидеркоины", main_layout, finalize=True,  return_keyboard_events=True,)
+    return sg.Window("Лидеркоины", main_layout, finalize=True,  return_keyboard_events=True, size=(500, 500))
 
 
 def make_group_window(event):
@@ -233,7 +230,7 @@ def make_change_coins_window():
     """создаётся окошко добавления или вычитания коинов
     """
     change_coins_layout = [
-        [sg.Input(size=(10, 10), key="COINS"), sg.Input(key="FOR_WHAT")],
+        [sg.Input(size=(10, 10), key="COINS_INPUT"), sg.Input(key="FOR_WHAT_INPUT")],
         [sg.Button("Добавить")],
     ]
     return sg.Window("Добавить/вычесть", change_coins_layout,
@@ -286,7 +283,5 @@ if __name__ == "__main__":
     main_window = make_main_window()
     main()
 
-# TODO: нужна ли менюшка??
 # TODO сделай возможность добавлять учеников
-# TODO сделай возможность добавлять группы
-# FIXME поля ввода баллов и "за что" не обнуляются после нажатия кнопки "добавить"
+# FIXME запретить ввод букв в инпут изменения коинов 
