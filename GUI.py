@@ -286,6 +286,8 @@ if __name__ == "__main__":
     main_window = make_main_window()
     main()
 
+def test_func():
+    pass
 # TODO: нужна ли менюшка??
 # TODO сделай возможность добавлять учеников
 # TODO сделай возможность добавлять группы
