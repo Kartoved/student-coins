@@ -4,14 +4,15 @@ import json
 import PySimpleGUI as sg
 
 # менюшка в главном окне
-menu_def = [["Добавить/удалить группу", ["Добавить группу", "Удалить группу"]]]
+main_menu = [["Добавить/удалить группу", ["Добавить группу", "Удалить группу"]]]
+add_student_menu = [["Добавить ученика", ["Добавить ученика"]]]
 
 # подгрузка списка групп из JSON
 try:
     with open("groups.json", "r") as f:
-        array_groups = json.load(f)
+        groups_array = json.load(f)
 except:
-    array_groups = ["начинающие", "средние", "сильные"]
+    groups_array = ["начинающие", "средние", "сильные"]
 
 # текущая отформатированная дата и время
 now = datetime.now().strftime("%d-%m-%Y")
@@ -24,12 +25,12 @@ def import_from_json(folder):
     Args:
         event (_str_): словарь с учениками
     """
-    global dic_group
+    global students_dic
     try:
         with open(f"{folder}.json", mode="r", encoding="utf-8") as file_json:
-            dic_group = json.load(file_json)
+            students_dic = json.load(file_json)
     except:
-        dic_group = {"Базаев": 20, "Данилова": 75, }
+        students_dic = {"Базаев": 20, "Данилова": 75, }
 
 
 def export_to_json(folder):
@@ -39,7 +40,7 @@ def export_to_json(folder):
         folder (_str_): папка группы
     """
     with open(f"{folder}.json", mode="w", encoding="utf-8") as file_json:
-        json.dump(dic_group, file_json, ensure_ascii=False, sort_keys=True)
+        json.dump(students_dic, file_json, ensure_ascii=False, sort_keys=True)
 
 
 def import_from_text(student_name):
@@ -65,13 +66,13 @@ def export_to_text(student_name, student_log):
 
 
 # функции добавления учеников и групп
-def create_newgroup_window():
-    change_coins_layout = [
-        [sg.Input(size=20, key="NEW_GROUP_INPUT")],
-        [sg.Button("Добавить группу", key="ADD_GROUP")],
-        [sg.Text("", key="NEW_GROUP_STATUS")]
+def create_adding_group_window():
+    layout = [
+        [sg.Input(size=20, key="ADD_GROUP_INPUT")],
+        [sg.Button("Добавить группу", key="ADD_GROUP_BUTTON")],
+        [sg.Text("", key="ADD_GROUP_TEXT")]
     ]
-    return sg.Window(title="Добавление группы", layout=change_coins_layout,
+    return sg.Window(title="Добавление группы", layout=layout,
                      finalize=True,  return_keyboard_events=True, size=(500, 200))
 
 
@@ -81,24 +82,30 @@ def create_group(name_of_new_group):
     Args:
         name_of_new_group (_str_): имя новой группы
     """
-    global main_layout, array_groups
-    array_groups.append(name_of_new_group)
+    global main_layout, groups_array
+    groups_array.append(name_of_new_group)
     with open("groups.json", "w", encoding="utf-8") as f:
-        json.dump(array_groups, f, ensure_ascii=False, sort_keys=True)
+        json.dump(groups_array, f, ensure_ascii=False, sort_keys=True)
     open(f"{name_of_new_group}.json", "w").close()
-    new_group_window["NEW_GROUP_INPUT"].update(value="")
-    new_group_window["NEW_GROUP_STATUS"].update(
+    new_group_window["ADD_GROUP_INPUT"].update(value="")
+    new_group_window["ADD_GROUP_TEXT"].update(
         value=f"Группа {name_of_new_group} была создана")
 
 
-def create_student():
-    pass
+def create_student(name_of_student): #доделать эту функцию. Пока тут тупо копипаст 
+    students_dic[name_of_student] = 0
+    # create_student(adding_student_window["ADD_STUDENT_INPUT"].get())
+    export_to_json(folder=folder)
+    adding_student_window["ADD_STUDENT_INPUT"].update(value="")
+    adding_student_window["ADD_STUDENT_TEXT"].update(
+        value=f"Ученик {name_of_student} был добавлен")
+    return students_dic
 
 
 def create_deletegroup_window():
     global deletegroup_layout
     deletegroup_layout = []
-    for group in array_groups:
+    for group in groups_array:
         deletegroup_layout.append(
             [sg.Button(f"удалить {group}")])
     deletegroup_layout.append([sg.Text(text="", key="DELETE_STATUS_TEXT")])
@@ -114,15 +121,22 @@ def delete_group(name_of_group):
     """
     
     os.remove(f"{name_of_group}.json")
-    array_groups.remove(name_of_group)
+    groups_array.remove(name_of_group)
     with open("groups.json", "w", encoding="utf-8") as f:
-        json.dump(array_groups, f, ensure_ascii=False, sort_keys=True)
+        json.dump(groups_array, f, ensure_ascii=False, sort_keys=True)
     deletegroup_window["DELETE_STATUS_TEXT"].update(
         value=f"{name_of_group} была удалена")
     # deletegroup_layout.remove(sg.Button(f"удалить {name_of_group}"))
     # deletegroup_window.refresh()
 
-
+def create_adding_student_window():
+    layout = [
+        [sg.Input(size=20, key="ADD_STUDENT_INPUT")],
+        [sg.Button("Добавить ученика", key="ADD_STUDENT_BUTTON")],
+        [sg.Text("", key="ADD_STUDENT_TEXT")]
+    ]
+    return sg.Window(title="Добавление ученика", layout=layout,
+                     finalize=True,  return_keyboard_events=True, size=(500, 200))
 
 def delete_student():
     pass
@@ -137,10 +151,10 @@ def change_coins(change_coins_window):
     """
     number_of_coins = int(change_coins_window["COINS_INPUT"].get())
     for_what = change_coins_window["FOR_WHAT_INPUT"].get()
-    dic_group[student_name] = dic_group[student_name] + \
+    students_dic[student_name] = students_dic[student_name] + \
         number_of_coins
     export_to_json(folder)
-    make_message(student_name, number_of_coins, for_what)
+    create_message(student_name, number_of_coins, for_what)
     change_coins_window["FOR_WHAT_INPUT"].update(value="")
     change_coins_window["COINS_INPUT"].update(value="")
 
@@ -171,16 +185,16 @@ def simple_change_coins(student_name, quantity_of_coins):
         quantity_of_coins (_int_): количество баллов
     """
     for_what = how_much_coins(quantity_of_coins)
-    dic_group[student_name] = dic_group[student_name] + quantity_of_coins
+    students_dic[student_name] = students_dic[student_name] + quantity_of_coins
     group_window["STATUS"].update(
         value=f"{now} {student_name} зачислено {quantity_of_coins} коинов за {for_what}")
     export_to_json(folder)
-    make_message(student_name, quantity_of_coins, for_what)
+    create_message(student_name, quantity_of_coins, for_what)
     group_window[f"{student_name} quantity_of_coins_COINS"].update(
-        dic_group[student_name])
+        students_dic[student_name])
 
 
-def make_message(student_name, quantity_of_coins_of_coins, for_what):
+def create_message(student_name, quantity_of_coins_of_coins, for_what):
     """создает сообщение о новой операции в текстовом логе и отображает изменения в окне STUDENT_LOG
 
     Args:
@@ -190,25 +204,25 @@ def make_message(student_name, quantity_of_coins_of_coins, for_what):
     """
     with open(f"Лидеркоины/{folder}/{student_name}.txt", "a", encoding="utf-8") as file_txt:
         file_txt.write(
-            f"\n{now} {student_name} {quantity_of_coins_of_coins} за {for_what}. Сейчас у него/неё {dic_group[student_name]}")
+            f"\n{now} {student_name} {quantity_of_coins_of_coins} за {for_what}. Сейчас у него/неё {students_dic[student_name]}")
     group_window["STATUS"].update(
-        f"\n{now} {student_name} {quantity_of_coins_of_coins} за {for_what}. \nСейчас у него/неё {dic_group[student_name]}")
+        f"\n{now} {student_name} {quantity_of_coins_of_coins} за {for_what}. \nСейчас у него/неё {students_dic[student_name]}")
     if student_window:
         import_from_text(student_name)
         student_window["STUDENT_LOG"].update(student_log)
 
 
 # фунции создания окон
-def make_main_window():
+def create_main_window():
     """создание основного окна"""
     global main_layout
-    main_layout = [[sg.Menu(menu_def)]]
-    for group in array_groups:
+    main_layout = [[sg.Menu(main_menu)]]
+    for group in groups_array:
         main_layout.append([sg.Button(group)])
     return sg.Window(title="Лидеркоины", layout=main_layout, finalize=True,  return_keyboard_events=True, size=(500, 500), resizable=True)
 
 
-def make_group_window(event):
+def create_group_window(event):
     """создаёт окно группы
 
     Args:
@@ -221,8 +235,9 @@ def make_group_window(event):
     folder = event
     btn_list = []
     import_from_json(folder)
-    group_layout = [[sg.Text(" \n ", key="STATUS")]]
-    for name, value in dic_group.items():
+    group_layout = [[sg.Menu(add_student_menu)],
+                    [sg.Text(" \n ", key="STATUS")]]
+    for name, value in students_dic.items():
         group_layout.append([sg.Button(name, size=(15, 0)), sg.Text(value, key=f"{name} quantity_of_coins_COINS", size=(5, 0)),
                              sg.Button("2", key=f"2 {name}", size=(3, 0)),
                              sg.Button("5", key=f"5 {name}", size=(3, 0)),
@@ -233,7 +248,7 @@ def make_group_window(event):
     return sg.Window(folder, group_layout, finalize=True,  return_keyboard_events=True, )
 
 
-def make_student_window(event):
+def create_student_window(event):
     """создаёт окно карточки ученика
 
     Args:
@@ -245,16 +260,15 @@ def make_student_window(event):
     global student_log, student_name
     import_from_text(event)
     student_name = event
-    student_layout = [[sg.Text(event), sg.Text(dic_group[event])],
-                      [sg.Button(
-                          "Добавить/вычесть"), sg.Button("Сохранить изменения"), sg.Button("Отмена")],
-                      [sg.Multiline(default_text=student_log,
-                                    size=(400, 300), key="STUDENT_LOG")],
-                      ]
+    student_layout = [[sg.Text(event), sg.Text(students_dic[event])],
+        [sg.Button("Добавить/вычесть"), sg.Button("Сохранить изменения"), sg.Button("Отмена")],
+        [sg.Multiline(default_text=student_log,
+                    size=(400, 300), key="STUDENT_LOG")],
+        ]
     return sg.Window(event, student_layout, finalize=True,  return_keyboard_events=True, size=(500, 800))
 
 
-def make_change_coins_window():
+def create_change_coins_window():
     """создаётся окошко добавления или вычитания коинов
     """
     change_coins_layout = [
@@ -269,9 +283,11 @@ def make_change_coins_window():
 
 
 def main():
-    global group_window, student_window, new_group_window, deletegroup_window
+    global group_window, student_window, new_group_window, deletegroup_window, adding_student_window
     group_window, student_window, change_coins_window, new_group_window, deletegroup_window = \
         None, None, None, None, None
+        
+    adding_student_window = None
     while True:
         window, event, values = sg.read_all_windows()
         # закрытие окна
@@ -281,24 +297,28 @@ def main():
                 break
         else:
             if event == "Добавить группу":
-                new_group_window = create_newgroup_window()
+                new_group_window = create_adding_group_window()
             elif event == "Удалить группу":
                 deletegroup_window = create_deletegroup_window()
             # выбор группы
-            elif event in array_groups:
-                group_window = make_group_window(event)
+            elif event in groups_array:
+                group_window = create_group_window(event)
+            if event == "Добавить ученика":
+                adding_student_window = create_adding_student_window()
             # создание других окон и обработка кнопок
             if group_window:
-                if event in dic_group.keys():
-                    student_window = make_student_window(event)
+                if event in students_dic.keys():
+                    student_window = create_student_window(event)
                 elif event in btn_list:
                     coins_and_name = event.split()
                     simple_change_coins(
                         coins_and_name[1], int(coins_and_name[0]))
-            if new_group_window and event == "ADD_GROUP":
-                create_group(new_group_window["NEW_GROUP_INPUT"].get())
+            if new_group_window and event == "ADD_GROUP_BUTTON":
+                create_group(new_group_window["ADD_GROUP_INPUT"].get())
+            if adding_student_window and event == "ADD_STUDENT_BUTTON":
+                create_student(adding_student_window["ADD_STUDENT_INPUT"].get())
             if deletegroup_window:
-                if len(event.split()) > 1 and event.split()[1] in array_groups:
+                if len(event.split()) > 1 and event.split()[1] in groups_array:
                     delete_group(event.split()[1])
             # обработка кнопок окна карточки ученика
             if event == "Сохранить изменения":
@@ -306,7 +326,7 @@ def main():
                     student_name, student_window["STUDENT_LOG"].get())
                 window.close()
             elif event == "Добавить/вычесть":
-                change_coins_window = make_change_coins_window()
+                change_coins_window = create_change_coins_window()
             elif event == "Отмена":
                 window.close()
             # окно зачисления и обработка его кнопок
@@ -316,9 +336,9 @@ def main():
 
 
 if __name__ == "__main__":
-    main_window = make_main_window()
+    main_window = create_main_window()
     main()
 
 # TODO сделай возможность добавлять учеников
 # FIXME запретить ввод букв в инпут изменения коинов
-# FIXME после открытия окна удаления, если открыть окно добавления и вбить в поле ввода символ, программа вылетает
+# FIXME если сделать быстрое добавление баллов после ручного добавления программа вылетает
