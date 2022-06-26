@@ -4,31 +4,35 @@
       "assignedTo": {
         "name": "Kartoved24"
       },
-      "creation_time": "2022-06-26T22:16:51.819Z",
-      "id": "3",
+      "creation_time": "2022-06-26T22:17:01.288Z",
+      "id": "4",
       "references": [],
-      "title": "сделай возможность добавлять учеников"
+      "title": "запретить ввод букв в инпут изменения коинов"
     },
     {
       "assignedTo": {
         "name": "Kartoved24"
       },
-      "creation_time": "2022-06-26T22:17:01.288Z",
-      "id": "4",
+      "creation_time": "2022-06-26T22:16:51.819Z",
+      "id": "3",
       "references": [],
-      "title": "запретить ввод букв в инпут изменения коинов"
+      "title": "сделай возможность добавлять учеников"
     }
   ],
   "in-progress": [
     {
       "assignedTo": {
-        "name": "Kartoved24"
+        "name": "Мне"
       },
       "creation_time": "2022-06-26T22:16:28.835Z",
       "id": "2",
       "references": [],
-      "title": "если сделать быстрое добавление баллов после ручного добавления программа вылетает",
-      "type": "bug"
+      "title": "программа вылетает после быстрого добавления после нажатия кнопки \"сохранить изменения\"",
+      "type": "bug",
+      "details": {
+        "content": "Traceback (most recent call last):\n  File \"/home/wood/Документы/GitHub/pet_projects/GUI.py\", line 342, in <module>\n    main()\n  File \"/home/wood/Документы/GitHub/pet_projects/GUI.py\", line 317, in main\n    simple_change_coins(coins_and_name[1], int(coins_and_name[0]))\n  File \"/home/wood/Документы/GitHub/pet_projects/GUI.py\", line 192, in simple_change_coins\n    create_message(student_name, quantity_of_coins, for_what)\n  File \"/home/wood/Документы/GitHub/pet_projects/GUI.py\", line 212, in create_message\n    student_window[\"STUDENT_LOG\"].update(student_log)\n  File \"/home/wood/.local/lib/python3.10/site-packages/PySimpleGUI/PySimpleGUI.py\", line 3250, in update\n    starting_point = self.Widget.index(tk.INSERT)\n  File \"/usr/lib/python3.10/tkinter/__init__.py\", line 3767, in index\n    return str(self.tk.call(self._w, 'index', index))\n_tkinter.TclError: invalid command name \".!toplevel3.!frame3.!frame.!text\"",
+        "mime": "text/markdown"
+      }
     }
   ],
   "testing": [],
