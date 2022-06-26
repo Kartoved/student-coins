@@ -1,0 +1,36 @@
+{
+  "todo": [
+    {
+      "assignedTo": {
+        "name": "Kartoved24"
+      },
+      "creation_time": "2022-06-26T22:16:51.819Z",
+      "id": "3",
+      "references": [],
+      "title": "сделай возможность добавлять учеников"
+    },
+    {
+      "assignedTo": {
+        "name": "Kartoved24"
+      },
+      "creation_time": "2022-06-26T22:17:01.288Z",
+      "id": "4",
+      "references": [],
+      "title": "запретить ввод букв в инпут изменения коинов"
+    }
+  ],
+  "in-progress": [
+    {
+      "assignedTo": {
+        "name": "Kartoved24"
+      },
+      "creation_time": "2022-06-26T22:16:28.835Z",
+      "id": "2",
+      "references": [],
+      "title": "если сделать быстрое добавление баллов после ручного добавления программа вылетает",
+      "type": "bug"
+    }
+  ],
+  "testing": [],
+  "done": []
+}

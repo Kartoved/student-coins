@@ -64,7 +64,7 @@ def export_to_text(student_name, student_log):
     with open(f"Лидеркоины/{folder}/{student_name}.txt", "w", encoding="utf-8") as file_txt:
         file_txt.write(student_log)
 
-
+1
 # функции добавления учеников и групп
 def create_adding_group_window():
     layout = [
@@ -295,6 +295,8 @@ def main():
             window.close()
             if window == main_window:
                 break
+            if window == student_window:
+                student_window = False
         else:
             if event == "Добавить группу":
                 new_group_window = create_adding_group_window()
@@ -311,8 +313,8 @@ def main():
                     student_window = create_student_window(event)
                 elif event in btn_list:
                     coins_and_name = event.split()
-                    simple_change_coins(
-                        coins_and_name[1], int(coins_and_name[0]))
+                    print(coins_and_name)
+                    simple_change_coins(coins_and_name[1], int(coins_and_name[0]))
             if new_group_window and event == "ADD_GROUP_BUTTON":
                 create_group(new_group_window["ADD_GROUP_INPUT"].get())
             if adding_student_window and event == "ADD_STUDENT_BUTTON":
