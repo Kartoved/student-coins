@@ -334,7 +334,7 @@ def main():
             # окно зачисления и обработка его кнопок
             elif change_coins_window:
                 if event == "Добавить":
-                    change_coins(change_coins_window)
+                    change_coins(change_coins_window) 
 
 
 if __name__ == "__main__":
