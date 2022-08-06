@@ -4,7 +4,8 @@ import json
 import PySimpleGUI as sg
 
 # менюшка в главном окне
-main_menu = [["Добавить/удалить группу", ["Добавить группу", "Удалить группу"]]]
+main_menu = [["Добавить/удалить группу",
+              ["Добавить группу", "Удалить группу"]]]
 add_student_menu = [["Добавить ученика", ["Добавить ученика"]]]
 
 # подгрузка списка групп из JSON
@@ -63,9 +64,9 @@ def export_to_text(student_name, student_log):
     """
     with open(f"Лидеркоины/{folder}/{student_name}.txt", "w", encoding="utf-8") as file_txt:
         file_txt.write(student_log)
-
-1
 # функции добавления учеников и групп
+
+
 def create_adding_group_window():
     layout = [
         [sg.Input(size=20, key="ADD_GROUP_INPUT")],
@@ -92,7 +93,7 @@ def create_group(name_of_new_group):
         value=f"Группа {name_of_new_group} была создана")
 
 
-def create_student(name_of_student): #доделать эту функцию. Пока тут тупо копипаст 
+def create_student(name_of_student):  # доделать эту функцию. Пока тут тупо копипаст
     students_dic[name_of_student] = 0
     # create_student(adding_student_window["ADD_STUDENT_INPUT"].get())
     export_to_json(folder=folder)
@@ -119,7 +120,7 @@ def delete_group(name_of_group):
     Args:
         name_of_group (_str_): имя удаляемой группы
     """
-    
+
     os.remove(f"{name_of_group}.json")
     groups_array.remove(name_of_group)
     with open("groups.json", "w", encoding="utf-8") as f:
@@ -129,6 +130,7 @@ def delete_group(name_of_group):
     # deletegroup_layout.remove(sg.Button(f"удалить {name_of_group}"))
     # deletegroup_window.refresh()
 
+
 def create_adding_student_window():
     layout = [
         [sg.Input(size=20, key="ADD_STUDENT_INPUT")],
@@ -137,6 +139,7 @@ def create_adding_student_window():
     ]
     return sg.Window(title="Добавление ученика", layout=layout,
                      finalize=True,  return_keyboard_events=True, size=(500, 200))
+
 
 def delete_student():
     pass
@@ -261,10 +264,11 @@ def create_student_window(event):
     import_from_text(event)
     student_name = event
     student_layout = [[sg.Text(event), sg.Text(students_dic[event])],
-        [sg.Button("Добавить/вычесть"), sg.Button("Сохранить изменения"), sg.Button("Отмена")],
-        [sg.Multiline(default_text=student_log,
-                    size=(400, 300), key="STUDENT_LOG")],
-        ]
+                      [sg.Button(
+                          "Добавить/вычесть"), sg.Button("Сохранить изменения"), sg.Button("Отмена")],
+                      [sg.Multiline(default_text=student_log,
+                                    size=(400, 300), key="STUDENT_LOG")],
+                      ]
     return sg.Window(event, student_layout, finalize=True,  return_keyboard_events=True, size=(500, 800))
 
 
@@ -286,7 +290,7 @@ def main():
     global group_window, student_window, new_group_window, deletegroup_window, adding_student_window
     group_window, student_window, change_coins_window, new_group_window, deletegroup_window = \
         None, None, None, None, None
-        
+
     adding_student_window = None
     while True:
         window, event, values = sg.read_all_windows()
@@ -314,11 +318,13 @@ def main():
                 elif event in btn_list:
                     coins_and_name = event.split()
                     print(coins_and_name)
-                    simple_change_coins(coins_and_name[1], int(coins_and_name[0]))
+                    simple_change_coins(
+                        coins_and_name[1], int(coins_and_name[0]))
             if new_group_window and event == "ADD_GROUP_BUTTON":
                 create_group(new_group_window["ADD_GROUP_INPUT"].get())
             if adding_student_window and event == "ADD_STUDENT_BUTTON":
-                create_student(adding_student_window["ADD_STUDENT_INPUT"].get())
+                create_student(
+                    adding_student_window["ADD_STUDENT_INPUT"].get())
             if deletegroup_window:
                 if len(event.split()) > 1 and event.split()[1] in groups_array:
                     delete_group(event.split()[1])
@@ -334,7 +340,7 @@ def main():
             # окно зачисления и обработка его кнопок
             elif change_coins_window:
                 if event == "Добавить":
-                    change_coins(change_coins_window) 
+                    change_coins(change_coins_window)
 
 
 if __name__ == "__main__":
