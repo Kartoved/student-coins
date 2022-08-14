@@ -2,6 +2,7 @@ from datetime import datetime
 import os
 import json
 import PySimpleGUI as sg
+import shutil
 
 # менюшка в главном окне
 main_menu = [["Добавить/удалить группу",
@@ -31,7 +32,7 @@ def import_from_json(folder):
         with open(f"{folder}.json", mode="r", encoding="utf-8") as file_json:
             students_dic = json.load(file_json)
     except:
-        students_dic = {"Базаев": 20, "Данилова": 75, }
+        students_dic = {}
 
 
 def export_to_json(folder):
@@ -64,6 +65,7 @@ def export_to_text(student_name, student_log):
     """
     with open(f"Лидеркоины/{folder}/{student_name}.txt", "w", encoding="utf-8") as file_txt:
         file_txt.write(student_log)
+
 # функции добавления учеников и групп
 
 
@@ -84,6 +86,7 @@ def create_group(name_of_new_group):
         name_of_new_group (_str_): имя новой группы
     """
     global main_layout, groups_array
+    os.mkdir(f"Лидеркоины//{name_of_new_group}")
     groups_array.append(name_of_new_group)
     with open("groups.json", "w", encoding="utf-8") as f:
         json.dump(groups_array, f, ensure_ascii=False, sort_keys=True)
@@ -96,6 +99,7 @@ def create_group(name_of_new_group):
 def create_student(name_of_student):  # доделать эту функцию. Пока тут тупо копипаст
     students_dic[name_of_student] = 0
     # create_student(adding_student_window["ADD_STUDENT_INPUT"].get())
+    open(f"Лидеркоины//{folder}//{name_of_student}.txt", "w+")
     export_to_json(folder=folder)
     adding_student_window["ADD_STUDENT_INPUT"].update(value="")
     adding_student_window["ADD_STUDENT_TEXT"].update(
@@ -104,6 +108,11 @@ def create_student(name_of_student):  # доделать эту функцию. 
 
 
 def create_deletegroup_window():
+    """ Создает окно удаление группы
+
+    Returns:
+        _str_: окно удаление группы
+    """
     global deletegroup_layout
     deletegroup_layout = []
     for group in groups_array:
@@ -122,6 +131,7 @@ def delete_group(name_of_group):
     """
 
     os.remove(f"{name_of_group}.json")
+    shutil.rmtree(f"Лидеркоины//{name_of_group}")
     groups_array.remove(name_of_group)
     with open("groups.json", "w", encoding="utf-8") as f:
         json.dump(groups_array, f, ensure_ascii=False, sort_keys=True)
@@ -138,11 +148,11 @@ def create_adding_student_window():
         [sg.Text("", key="ADD_STUDENT_TEXT")]
     ]
     return sg.Window(title="Добавление ученика", layout=layout,
-                     finalize=True,  return_keyboard_events=True, size=(500, 200))
+                     finalize=True,  return_keyboard_events=True, size=(500, 200), resizable=True)
 
 
-def delete_student():
-    pass
+def delete_student(name_of_student):
+    os.remove(f"{name_of_student}.txt")
 # другие функции
 
 
@@ -269,13 +279,13 @@ def create_student_window(event):
                       [sg.Multiline(default_text=student_log,
                                     size=(400, 300), key="STUDENT_LOG")],
                       ]
-    return sg.Window(event, student_layout, finalize=True,  return_keyboard_events=True, size=(500, 800))
+    return sg.Window(event, student_layout, finalize=True,  return_keyboard_events=True, resizable=True)
 
 
 def create_change_coins_window():
     """создаётся окошко добавления или вычитания коинов
     """
-    change_coins_layout = [
+    change_coins_layout=[
         [sg.Input(size=(10, 10), key="COINS_INPUT"),
          sg.Input(key="FOR_WHAT_INPUT")],
         [sg.Button("Добавить")],
@@ -288,35 +298,34 @@ def create_change_coins_window():
 
 def main():
     global group_window, student_window, new_group_window, deletegroup_window, adding_student_window
-    group_window, student_window, change_coins_window, new_group_window, deletegroup_window = \
-        None, None, None, None, None
+    group_window, student_window, change_coins_window, new_group_window, deletegroup_window=None, None, None, None, None
 
-    adding_student_window = None
+    adding_student_window=None
     while True:
-        window, event, values = sg.read_all_windows()
+        window, event, values=sg.read_all_windows()
         # закрытие окна
         if event == sg.WIN_CLOSED:
             window.close()
             if window == main_window:
                 break
             if window == student_window:
-                student_window = False
+                student_window=False
         else:
             if event == "Добавить группу":
-                new_group_window = create_adding_group_window()
+                new_group_window=create_adding_group_window()
             elif event == "Удалить группу":
-                deletegroup_window = create_deletegroup_window()
+                deletegroup_window=create_deletegroup_window()
             # выбор группы
             elif event in groups_array:
-                group_window = create_group_window(event)
+                group_window=create_group_window(event)
             if event == "Добавить ученика":
-                adding_student_window = create_adding_student_window()
+                adding_student_window=create_adding_student_window()
             # создание других окон и обработка кнопок
             if group_window:
                 if event in students_dic.keys():
-                    student_window = create_student_window(event)
+                    student_window=create_student_window(event)
                 elif event in btn_list:
-                    coins_and_name = event.split()
+                    coins_and_name=event.split()
                     print(coins_and_name)
                     simple_change_coins(
                         coins_and_name[1], int(coins_and_name[0]))
@@ -334,7 +343,7 @@ def main():
                     student_name, student_window["STUDENT_LOG"].get())
                 window.close()
             elif event == "Добавить/вычесть":
-                change_coins_window = create_change_coins_window()
+                change_coins_window=create_change_coins_window()
             elif event == "Отмена":
                 window.close()
             # окно зачисления и обработка его кнопок
@@ -344,7 +353,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main_window = create_main_window()
+    main_window=create_main_window()
     main()
 
 # TODO сделай возможность добавлять учеников
