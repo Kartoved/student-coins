@@ -137,8 +137,6 @@ def delete_group(name_of_group):
         json.dump(groups_array, f, ensure_ascii=False, sort_keys=True)
     deletegroup_window["DELETE_STATUS_TEXT"].update(
         value=f"{name_of_group} была удалена")
-    # deletegroup_layout.remove(sg.Button(f"удалить {name_of_group}"))
-    # deletegroup_window.refresh()
 
 
 def create_adding_student_window():
@@ -152,9 +150,13 @@ def create_adding_student_window():
 
 
 def delete_student(name_of_student):
-    os.remove(f"{name_of_student}.txt")
+    os.remove(f"Лидеркоины//{folder}//{name_of_student}.txt")
+    del students_dic[name_of_student]
+    group_window["STATUS"].update(f"{name_of_student} был удалён")
+    export_to_json(folder)
+    
+    
 # другие функции
-
 
 def change_coins(change_coins_window):
     """изменяет баллы
@@ -225,7 +227,7 @@ def create_message(student_name, quantity_of_coins_of_coins, for_what):
         student_window["STUDENT_LOG"].update(student_log)
 
 
-# фунции создания окон
+# функции создания окон
 def create_main_window():
     """создание основного окна"""
     global main_layout
@@ -251,10 +253,13 @@ def create_group_window(event):
     group_layout = [[sg.Menu(add_student_menu)],
                     [sg.Text(" \n ", key="STATUS")]]
     for name, value in students_dic.items():
-        group_layout.append([sg.Button(name, size=(15, 0)), sg.Text(value, key=f"{name} quantity_of_coins_COINS", size=(5, 0)),
+        group_layout.append([sg.Button("x", button_color="red", key=f"DELETE {name}"), 
+                             sg.Button(name, size=(15, 0)), 
+                             sg.Text(value, key=f"{name} quantity_of_coins_COINS", size=(5, 0)),
                              sg.Button("2", key=f"2 {name}", size=(3, 0)),
                              sg.Button("5", key=f"5 {name}", size=(3, 0)),
                              sg.Button("10", key=f"10 {name}", size=(3, 0))])
+        btn_list.append(f"DELETE {name}")
         btn_list.append(f"2 {name}")
         btn_list.append(f"5 {name}")
         btn_list.append(f"10 {name}")
@@ -293,8 +298,8 @@ def create_change_coins_window():
     return sg.Window("Добавить/вычесть", change_coins_layout,
                      finalize=True,  return_keyboard_events=True)
 
-# основной цикл программы
 
+# основной цикл программы
 
 def main():
     global group_window, student_window, new_group_window, deletegroup_window, adding_student_window
@@ -326,9 +331,11 @@ def main():
                     student_window=create_student_window(event)
                 elif event in btn_list:
                     coins_and_name=event.split()
-                    print(coins_and_name)
-                    simple_change_coins(
-                        coins_and_name[1], int(coins_and_name[0]))
+                    if coins_and_name[0] == "DELETE":
+                        delete_student(coins_and_name[1])
+                    else:
+                        print(coins_and_name)
+                        simple_change_coins(coins_and_name[1], int(coins_and_name[0]))
             if new_group_window and event == "ADD_GROUP_BUTTON":
                 create_group(new_group_window["ADD_GROUP_INPUT"].get())
             if adding_student_window and event == "ADD_STUDENT_BUTTON":
@@ -356,6 +363,5 @@ if __name__ == "__main__":
     main_window=create_main_window()
     main()
 
-# TODO сделай возможность добавлять учеников
 # FIXME запретить ввод букв в инпут изменения коинов
 # FIXME если сделать быстрое добавление баллов после ручного добавления программа вылетает
