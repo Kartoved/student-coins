@@ -96,14 +96,14 @@ def create_group(name_of_new_group):
         value=f"Группа {name_of_new_group} была создана")
 
 
-def create_student(name_of_student):  # доделать эту функцию. Пока тут тупо копипаст
-    students_dic[name_of_student] = 0
+def create_student(student_name):  # доделать эту функцию. Пока тут тупо копипаст
+    students_dic[student_name] = 0
     # create_student(adding_student_window["ADD_STUDENT_INPUT"].get())
-    open(f"Лидеркоины//{folder}//{name_of_student}.txt", "w+")
+    open(f"Лидеркоины//{folder}//{student_name}.txt", "w+")
     export_to_json(folder=folder)
     adding_student_window["ADD_STUDENT_INPUT"].update(value="")
     adding_student_window["ADD_STUDENT_TEXT"].update(
-        value=f"Ученик {name_of_student} был добавлен")
+        value=f"Ученик {student_name} был добавлен")
     return students_dic
 
 
@@ -149,10 +149,10 @@ def create_adding_student_window():
                      finalize=True,  return_keyboard_events=True, size=(500, 200), resizable=True)
 
 
-def delete_student(name_of_student):
-    os.remove(f"Лидеркоины//{folder}//{name_of_student}.txt")
-    del students_dic[name_of_student]
-    group_window["STATUS"].update(f"{name_of_student} был удалён")
+def delete_student(student_name):
+    os.remove(f"Лидеркоины//{folder}//{student_name}.txt")
+    del students_dic[student_name]
+    group_window["STATUS"].update(f"{student_name} был удалён")
     export_to_json(folder)
     
     
@@ -218,13 +218,15 @@ def create_message(student_name, quantity_of_coins_of_coins, for_what):
         for_what (_str_): за что получил
     """
     with open(f"Лидеркоины/{folder}/{student_name}.txt", "a", encoding="utf-8") as file_txt:
-        file_txt.write(
-            f"\n{now} {student_name} {quantity_of_coins_of_coins} за {for_what}. Сейчас у него/неё {students_dic[student_name]}")
+        file_txt.write(f"\n{now} {student_name} {quantity_of_coins_of_coins} за {for_what}. Сейчас у него/неё {students_dic[student_name]}")
     group_window["STATUS"].update(
         f"\n{now} {student_name} {quantity_of_coins_of_coins} за {for_what}. \nСейчас у него/неё {students_dic[student_name]}")
     if student_window:
         import_from_text(student_name)
-        student_window["STUDENT_LOG"].update(student_log)
+        try: 
+            student_window["STUDENT_LOG"].update(student_log)
+        except:
+            pass
 
 
 # функции создания окон
