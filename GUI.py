@@ -150,13 +150,16 @@ def create_adding_student_window():
 
 
 def delete_student(student_name):
-    os.remove(f"Лидеркоины//{folder}//{student_name}.txt")
-    del students_dic[student_name]
-    group_window["STATUS"].update(f"{student_name} был удалён")
-    export_to_json(folder)
-    
-    
+    popup_answer = sg.popup_yes_no(
+        f"Вы уверены, что хотите удалить {student_name}?")
+    if popup_answer == 'Yes':
+        os.remove(f"Лидеркоины//{folder}//{student_name}.txt")
+        del students_dic[student_name]
+        group_window["STATUS"].update(f"{student_name} был удалён")
+        export_to_json(folder)
+
 # другие функции
+
 
 def change_coins(change_coins_window):
     """изменяет баллы
@@ -218,12 +221,13 @@ def create_message(student_name, quantity_of_coins_of_coins, for_what):
         for_what (_str_): за что получил
     """
     with open(f"Лидеркоины/{folder}/{student_name}.txt", "a", encoding="utf-8") as file_txt:
-        file_txt.write(f"\n{now} {student_name} {quantity_of_coins_of_coins} за {for_what}. Сейчас у него/неё {students_dic[student_name]}")
+        file_txt.write(
+            f"\n{now} {student_name} {quantity_of_coins_of_coins} за {for_what}. Сейчас у него/неё {students_dic[student_name]}")
     group_window["STATUS"].update(
         f"\n{now} {student_name} {quantity_of_coins_of_coins} за {for_what}. \nСейчас у него/неё {students_dic[student_name]}")
     if student_window:
         import_from_text(student_name)
-        try: 
+        try:
             student_window["STUDENT_LOG"].update(student_log)
         except:
             pass
@@ -255,9 +259,10 @@ def create_group_window(event):
     group_layout = [[sg.Menu(add_student_menu)],
                     [sg.Text(" \n ", key="STATUS")]]
     for name, value in students_dic.items():
-        group_layout.append([sg.Button("x", button_color="red", key=f"DELETE {name}"), 
-                             sg.Button(name, size=(15, 0)), 
-                             sg.Text(value, key=f"{name} quantity_of_coins_COINS", size=(5, 0)),
+        group_layout.append([sg.Button("x", button_color="red", key=f"DELETE {name}"),
+                             sg.Button(name, size=(15, 0)),
+                             sg.Text(
+                                 value, key=f"{name} quantity_of_coins_COINS", size=(5, 0)),
                              sg.Button("2", key=f"2 {name}", size=(3, 0)),
                              sg.Button("5", key=f"5 {name}", size=(3, 0)),
                              sg.Button("10", key=f"10 {name}", size=(3, 0))])
@@ -292,7 +297,7 @@ def create_student_window(event):
 def create_change_coins_window():
     """создаётся окошко добавления или вычитания коинов
     """
-    change_coins_layout=[
+    change_coins_layout = [
         [sg.Input(size=(10, 10), key="COINS_INPUT"),
          sg.Input(key="FOR_WHAT_INPUT")],
         [sg.Button("Добавить")],
@@ -305,39 +310,40 @@ def create_change_coins_window():
 
 def main():
     global group_window, student_window, new_group_window, deletegroup_window, adding_student_window
-    group_window, student_window, change_coins_window, new_group_window, deletegroup_window=None, None, None, None, None
+    group_window, student_window, change_coins_window, new_group_window, deletegroup_window = None, None, None, None, None
 
-    adding_student_window=None
+    adding_student_window = None
     while True:
-        window, event, values=sg.read_all_windows()
+        window, event, values = sg.read_all_windows()
         # закрытие окна
         if event == sg.WIN_CLOSED:
             window.close()
             if window == main_window:
                 break
             if window == student_window:
-                student_window=False
+                student_window = False
         else:
             if event == "Добавить группу":
-                new_group_window=create_adding_group_window()
+                new_group_window = create_adding_group_window()
             elif event == "Удалить группу":
-                deletegroup_window=create_deletegroup_window()
+                deletegroup_window = create_deletegroup_window()
             # выбор группы
             elif event in groups_array:
-                group_window=create_group_window(event)
+                group_window = create_group_window(event)
             if event == "Добавить ученика":
-                adding_student_window=create_adding_student_window()
+                adding_student_window = create_adding_student_window()
             # создание других окон и обработка кнопок
             if group_window:
                 if event in students_dic.keys():
-                    student_window=create_student_window(event)
+                    student_window = create_student_window(event)
                 elif event in btn_list:
-                    coins_and_name=event.split()
+                    coins_and_name = event.split()
                     if coins_and_name[0] == "DELETE":
                         delete_student(coins_and_name[1])
                     else:
                         print(coins_and_name)
-                        simple_change_coins(coins_and_name[1], int(coins_and_name[0]))
+                        simple_change_coins(
+                            coins_and_name[1], int(coins_and_name[0]))
             if new_group_window and event == "ADD_GROUP_BUTTON":
                 create_group(new_group_window["ADD_GROUP_INPUT"].get())
             if adding_student_window and event == "ADD_STUDENT_BUTTON":
@@ -352,7 +358,7 @@ def main():
                     student_name, student_window["STUDENT_LOG"].get())
                 window.close()
             elif event == "Добавить/вычесть":
-                change_coins_window=create_change_coins_window()
+                change_coins_window = create_change_coins_window()
             elif event == "Отмена":
                 window.close()
             # окно зачисления и обработка его кнопок
@@ -362,7 +368,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main_window=create_main_window()
+    main_window = create_main_window()
     main()
 
 # FIXME запретить ввод букв в инпут изменения коинов
