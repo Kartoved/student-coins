@@ -11,10 +11,10 @@ add_student_menu = [["Добавить ученика", ["Добавить уч�
 
 # подгрузка списка групп из JSON
 try:
-    with open("groups.json", "r") as f:
+    with open("groups.json", "r", encoding="utf-8") as f:
         groups_array = json.load(f)
 except:
-    groups_array = ["начинающие", "средние", "сильные"]
+    pass
 
 # текущая отформатированная дата и время
 now = datetime.now().strftime("%d-%m-%Y")
@@ -41,8 +41,8 @@ def export_to_json(folder):
     Args:
         folder (_str_): папка группы
     """
-    with open(f"{folder}.json", mode="w", encoding="utf-8") as file_json:
-        json.dump(students_dic, file_json, ensure_ascii=False, sort_keys=True)
+    with open(f"{folder}.json", mode="w") as file_json:
+        json.dump(students_dic, file_json, sort_keys=True)
 
 
 def import_from_text(student_name):
@@ -131,7 +131,7 @@ def delete_group(name_of_group):
     """
 
     os.remove(f"{name_of_group}.json")
-    shutil.rmtree(f"Лидеркоины//{name_of_group}")
+    shutil.rmtree(f"Лидеркоины/{name_of_group}")
     groups_array.remove(name_of_group)
     with open("groups.json", "w", encoding="utf-8") as f:
         json.dump(groups_array, f, ensure_ascii=False, sort_keys=True)
@@ -153,7 +153,7 @@ def delete_student(student_name):
     popup_answer = sg.popup_yes_no(
         f"Вы уверены, что хотите удалить {student_name}?")
     if popup_answer == 'Yes':
-        os.remove(f"Лидеркоины//{folder}//{student_name}.txt")
+        os.remove(f"Лидеркоины/{folder}/{student_name}.txt")
         del students_dic[student_name]
         group_window["STATUS"].update(f"{student_name} был удалён")
         export_to_json(folder)
@@ -169,8 +169,7 @@ def change_coins(change_coins_window):
     """
     number_of_coins = int(change_coins_window["COINS_INPUT"].get())
     for_what = change_coins_window["FOR_WHAT_INPUT"].get()
-    students_dic[student_name] = students_dic[student_name] + \
-        number_of_coins
+    students_dic[student_name] = students_dic[student_name] + number_of_coins
     export_to_json(folder)
     create_message(student_name, number_of_coins, for_what)
     change_coins_window["FOR_WHAT_INPUT"].update(value="")
@@ -188,10 +187,22 @@ def how_much_coins(quantity_of_coins):
     """
     if quantity_of_coins == 2:
         for_what = "посещение"
+    elif quantity_of_coins == 3:
+        for_what = "активность на занятии"
     elif quantity_of_coins == 5:
         for_what = "победу"
     elif quantity_of_coins == 10:
         for_what = "участие в онлайн турнире"
+    elif quantity_of_coins == 30:
+        for_what = "третье место в онлайн турнире"
+    elif quantity_of_coins == 40:
+        for_what = "второе место в онлайн турнире"
+    elif quantity_of_coins == 50:
+        for_what = "первое место в онлайн турнире"
+    elif quantity_of_coins == -5:
+        for_what = "поведение"
+    elif quantity_of_coins == -1:
+        for_what = "поведение"
     return for_what
 
 
@@ -208,7 +219,7 @@ def simple_change_coins(student_name, quantity_of_coins):
         value=f"{now} {student_name} зачислено {quantity_of_coins} коинов за {for_what}")
     export_to_json(folder)
     create_message(student_name, quantity_of_coins, for_what)
-    group_window[f"{student_name} quantity_of_coins_COINS"].update(
+    group_window[f"{student_name} quantity_of_coins"].update(
         students_dic[student_name])
 
 
@@ -222,9 +233,9 @@ def create_message(student_name, quantity_of_coins_of_coins, for_what):
     """
     with open(f"Лидеркоины/{folder}/{student_name}.txt", "a", encoding="utf-8") as file_txt:
         file_txt.write(
-            f"\n{now} {student_name} {quantity_of_coins_of_coins} за {for_what}. Сейчас у него/неё {students_dic[student_name]}")
+            f"\n{now} {student_name} {quantity_of_coins_of_coins} лидеркоин(а/ов) за {for_what}. Сейчас у него/неё {students_dic[student_name]} лидеркоин(а/ов)")
     group_window["STATUS"].update(
-        f"\n{now} {student_name} {quantity_of_coins_of_coins} за {for_what}. \nСейчас у него/неё {students_dic[student_name]}")
+        f"\n{now} {student_name} {quantity_of_coins_of_coins} лидеркоин(а/ов) за {for_what}. \nСейчас у него/неё {students_dic[student_name]} лидеркоин(а/ов)")
     if student_window:
         import_from_text(student_name)
         try:
@@ -260,16 +271,32 @@ def create_group_window(event):
                     [sg.Text(" \n ", key="STATUS")]]
     for name, value in students_dic.items():
         group_layout.append([sg.Button("x", button_color="red", key=f"DELETE {name}"),
-                             sg.Button(name, size=(15, 0)),
+                             sg.Button(name, button_color='#228B22',
+                                       size=(15, 0)),
                              sg.Text(
-                                 value, key=f"{name} quantity_of_coins_COINS", size=(5, 0)),
+                                 value, key=f"{name} quantity_of_coins", size=(5, 0)),
+                             sg.Button("-1", button_color='#F08080',
+                                       key=f"-1 {name}", size=(3, 0)),
+                             sg.Button("-5", button_color='#F08080',
+                                       key=f"-5 {name}", size=(3, 0)),
                              sg.Button("2", key=f"2 {name}", size=(3, 0)),
+                             sg.Button("3", key=f"3 {name}", size=(3, 0)),
                              sg.Button("5", key=f"5 {name}", size=(3, 0)),
-                             sg.Button("10", key=f"10 {name}", size=(3, 0))])
+                             sg.Button("10", key=f"10 {name}", size=(3, 0)),
+                             sg.Button("30", key=f"30 {name}", size=(3, 0)),
+                             sg.Button("40", key=f"40 {name}", size=(3, 0)),
+                             sg.Button("50", key=f"50 {name}", size=(3, 0)),
+                             ])
         btn_list.append(f"DELETE {name}")
+        btn_list.append(f"-1 {name}")
+        btn_list.append(f"-5 {name}")
         btn_list.append(f"2 {name}")
+        btn_list.append(f"3 {name}")
         btn_list.append(f"5 {name}")
         btn_list.append(f"10 {name}")
+        btn_list.append(f"30 {name}")
+        btn_list.append(f"40 {name}")
+        btn_list.append(f"50 {name}")
     return sg.Window(folder, group_layout, finalize=True,  return_keyboard_events=True, )
 
 
@@ -322,6 +349,7 @@ def main():
                 break
             if window == student_window:
                 student_window = False
+                change_coins_window.close()
         else:
             if event == "Добавить группу":
                 new_group_window = create_adding_group_window()
@@ -341,7 +369,6 @@ def main():
                     if coins_and_name[0] == "DELETE":
                         delete_student(coins_and_name[1])
                     else:
-                        print(coins_and_name)
                         simple_change_coins(
                             coins_and_name[1], int(coins_and_name[0]))
             if new_group_window and event == "ADD_GROUP_BUTTON":
