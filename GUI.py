@@ -1,72 +1,10 @@
-from datetime import datetime
 import os
 import json
 import PySimpleGUI as sg
-import shutil
+from shutil import rmtree
+from config import *
+from working_with_files import *
 
-# менюшка в главном окне
-main_menu = [["Добавить/удалить группу",
-              ["Добавить группу", "Удалить группу"]]]
-add_student_menu = [["Добавить ученика", ["Добавить ученика"]]]
-
-# подгрузка списка групп из JSON
-try:
-    with open("groups.json", "r", encoding="utf-8") as f:
-        groups_array = json.load(f)
-except:
-    pass
-
-# текущая отформатированная дата и время
-now = datetime.now().strftime("%d-%m-%Y")
-
-
-# функции импорта и экспорта файлов
-def import_from_json(folder):
-    """импортирует фамилии из файла JSON
-
-    Args:
-        event (_str_): словарь с учениками
-    """
-    global students_dic
-    try:
-        with open(f"{folder}.json", mode="r", encoding="utf-8") as file_json:
-            students_dic = json.load(file_json)
-    except:
-        students_dic = {}
-
-
-def export_to_json(folder):
-    """экспортирует данные учеников в виде словаря JSON
-
-    Args:
-        folder (_str_): папка группы
-    """
-    with open(f"{folder}.json", mode="w") as file_json:
-        json.dump(students_dic, file_json, sort_keys=True)
-
-
-def import_from_text(student_name):
-    """импортирует лог ученика из его личного файла .txt
-
-    Args:
-        student_name (_type_): фамилия ученика
-    """
-    global student_log
-    with open(f"Лидеркоины/{folder}/{student_name}.txt", encoding="utf-8") as file_txt:
-        student_log = file_txt.read()
-
-
-def export_to_text(student_name, student_log):
-    """экспортирует лог ученика в личный файл .txt
-
-    Args:
-        student_name (_str_): фамилия ученика
-        student_log: лог ученика
-    """
-    with open(f"Лидеркоины/{folder}/{student_name}.txt", "w", encoding="utf-8") as file_txt:
-        file_txt.write(student_log)
-
-# функции добавления учеников и групп
 
 
 def create_adding_group_window():
@@ -79,40 +17,10 @@ def create_adding_group_window():
                      finalize=True,  return_keyboard_events=True, size=(500, 200))
 
 
-def create_group(name_of_new_group):
-    """создаёт новую группу и добавляет её в файл JSON
-
-    Args:
-        name_of_new_group (_str_): имя новой группы
-    """
-    global main_layout, groups_array
-    os.mkdir(f"Лидеркоины//{name_of_new_group}")
-    groups_array.append(name_of_new_group)
-    with open("groups.json", "w", encoding="utf-8") as f:
-        json.dump(groups_array, f, ensure_ascii=False, sort_keys=True)
-    open(f"{name_of_new_group}.json", "w").close()
-    new_group_window["ADD_GROUP_INPUT"].update(value="")
-    new_group_window["ADD_GROUP_TEXT"].update(
-        value=f"Группа {name_of_new_group} была создана")
-
-
-def create_student(student_name):  # доделать эту функцию. Пока тут тупо копипаст
-    students_dic[student_name] = 0
-    # create_student(adding_student_window["ADD_STUDENT_INPUT"].get())
-    open(f"Лидеркоины//{folder}//{student_name}.txt", "w+")
-    export_to_json(folder=folder)
-    adding_student_window["ADD_STUDENT_INPUT"].update(value="")
-    adding_student_window["ADD_STUDENT_TEXT"].update(
-        value=f"Ученик {student_name} был добавлен")
-    return students_dic
 
 
 def create_deletegroup_window():
-    """ Создает окно удаление группы
-
-    Returns:
-        _str_: окно удаление группы
-    """
+    """Создает окно удаление группы"""
     global deletegroup_layout
     deletegroup_layout = []
     for group in groups_array:
@@ -123,15 +31,10 @@ def create_deletegroup_window():
                      finalize=True,  return_keyboard_events=True, size=(300, 300))
 
 
-def delete_group(name_of_group):
-    """удаляет группу из файла groups.json и стирает её файл JSON
-
-    Args:
-        name_of_group (_str_): имя удаляемой группы
-    """
-
+def delete_group(name_of_group: str):
+    """удаляет группу из файла groups.json и стирает её файл JSON"""
     os.remove(f"{name_of_group}.json")
-    shutil.rmtree(f"Лидеркоины/{name_of_group}")
+    rmtree(f"Лидеркоины/{name_of_group}")
     groups_array.remove(name_of_group)
     with open("groups.json", "w", encoding="utf-8") as f:
         json.dump(groups_array, f, ensure_ascii=False, sort_keys=True)
@@ -163,7 +66,6 @@ def delete_student(student_name):
 
 def change_coins(change_coins_window):
     """изменяет баллы
-
     Args:
         number_of_coins (_int_): количество монеток
     """
@@ -178,10 +80,8 @@ def change_coins(change_coins_window):
 
 def how_much_coins(quantity_of_coins):
     """проверяет, сколько коинов надо зачислить. Работает для кнопок быстрого зачисления
-
     Args:
         quantity_of_coins (_int_): количество баллов
-
     Return:
         for_what (_str_): за что получил баллы
     """
@@ -208,7 +108,6 @@ def how_much_coins(quantity_of_coins):
 
 def simple_change_coins(student_name, quantity_of_coins):
     """прибавляет/вычитает баллы по кнопке
-
     Args:
         student_name (_str_): имя студента
         quantity_of_coins (_int_): количество баллов
@@ -225,7 +124,6 @@ def simple_change_coins(student_name, quantity_of_coins):
 
 def create_message(student_name, quantity_of_coins_of_coins, for_what):
     """создает сообщение о новой операции в текстовом логе и отображает изменения в окне STUDENT_LOG
-
     Args:
         student_name (_str_): имя ученика
         quantity_of_coins_of_coins (_int_): количество коинов
@@ -254,15 +152,8 @@ def create_main_window():
     return sg.Window(title="Лидеркоины", layout=main_layout, finalize=True,  return_keyboard_events=True, size=(500, 500), resizable=True)
 
 
-def create_group_window(event):
-    """создаёт окно группы
-
-    Args:
-        event (_str_): имя папки группы
-
-    Returns:
-        _window_: окно группы
-    """
+def create_group_window(event: str):
+    """создаёт окно группы"""
     global btn_list, folder
     folder = event
     btn_list = []
@@ -300,15 +191,8 @@ def create_group_window(event):
     return sg.Window(folder, group_layout, finalize=True,  return_keyboard_events=True, )
 
 
-def create_student_window(event):
-    """создаёт окно карточки ученика
-
-    Args:
-        event (_str_): имя ученика на кнопке
-
-    Returns:
-        _window_: окно карточки ученика
-    """
+def create_student_window(event: str):
+    """создаёт окно карточки ученика """
     global student_log, student_name
     import_from_text(event)
     student_name = event
@@ -322,8 +206,7 @@ def create_student_window(event):
 
 
 def create_change_coins_window():
-    """создаётся окошко добавления или вычитания коинов
-    """
+    """создаётся окошко добавления или вычитания коинов """
     change_coins_layout = [
         [sg.Input(size=(10, 10), key="COINS_INPUT"),
          sg.Input(key="FOR_WHAT_INPUT")],
@@ -397,6 +280,3 @@ def main():
 if __name__ == "__main__":
     main_window = create_main_window()
     main()
-
-# FIXME запретить ввод букв в инпут изменения коинов
-# FIXME если сделать быстрое добавление баллов после ручного добавления программа вылетает
