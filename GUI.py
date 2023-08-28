@@ -42,7 +42,7 @@ def export_to_json(folder):
         folder (_str_): папка группы
     """
     with open(f"{folder}.json", mode="w") as file_json:
-        json.dump(students_dic, file_json, sort_keys=True)
+        json.dump(students_dic, file_json, sort_keys=True, ensure_ascii=False)
 
 
 def import_from_text(student_name):
